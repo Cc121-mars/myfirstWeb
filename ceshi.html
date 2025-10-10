@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>机密计算测试用例展示平台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #0366d6;
+            --secondary-color: #28a745;
+            --bg-color: #f6f8fa;
+            --sidebar-bg: #24292e;
+            --sidebar-text: #fafbfc;
+            --card-bg: #ffffff;
+            --border-color: #e1e4e8;
+            --shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: var(--bg-color);
+            color: #24292e;
+        }
+        
+        /* 侧边栏样式 */
+        .sidebar {
+            width: 320px;
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            padding: 20px 0;
+            overflow-y: auto;
+            position: fixed;
+            height: 100vh;
+            transition: all 0.3s;
+            z-index: 100;
+        }
+        
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 15px;
+        }
+        
+        .sidebar-header h2 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        
+        .sidebar-header p {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        
+        .search-box {
+            padding: 0 20px 15px;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: none;
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+        }
+        
+        .search-box input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+        
+        .nav-menu {
+            list-style: none;
+        }
+        
+        .nav-item {
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        
+        .nav-item a:hover {
+            background-color: rgba(255,255,255,0.05);
+        }
+        
+        .nav-item.active > a {
+            background-color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .nav-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .submenu {
+            list-style: none;
+            display: none;
+            background-color: rgba(0,0,0,0.1);
+        }
+        
+        .nav-item.active .submenu {
+            display: block;
+        }
+        
+        .submenu .nav-item a {
+            padding-left: 40px;
+            font-size: 0.9rem;
+        }
+        
+        .submenu .submenu .nav-item a {
+            padding-left: 60px;
+        }
+        
+        .toggle-btn {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 101;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        /* 主内容区样式 */
+        .main-content {
+            flex: 1;
+            margin-left: 320px;
+            padding: 30px;
+            transition: all 0.3s;
+        }
+        
+        .page-header {
+            margin-bottom: 30px;
+        }
+        
+        .page-header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+        
+        .page-header p {
+            color: #586069;
+            font-size: 1.1rem;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            background-color: var(--card-bg);
+            border-radius: 6px;
+            box-shadow: var(--shadow);
+            padding: 25px;
+            scroll-margin-top: 20px;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            color: #24292e;
+        }
+        
+        .section-subtitle {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin: 20px 0 10px;
+            padding-left: 10px;
+            border-left: 4px solid var(--primary-color);
+            scroll-margin-top: 20px;
+        }
+        
+        .section-subtitle-2 {
+            font-size: 1.1rem;
+            color: #586069;
+            margin: 15px 0 8px;
+            padding-left: 15px;
+            border-left: 3px solid #6c757d;
+            scroll-margin-top: 20px;
+        }
+        
+        .requirements-list {
+            margin: 15px 0;
+            padding-left: 20px;
+        }
+        
+        .requirements-list li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        .test-case-card {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 4px solid var(--secondary-color);
+            scroll-margin-top: 20px;
+        }
+        
+        .test-case-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        
+        .test-case-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .test-case-id {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        
+        .test-case-content {
+            color: #586069;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .test-case-content p {
+            margin-bottom: 10px;
+        }
+        
+        .test-case-content strong {
+            color: #24292e;
+        }
+        
+        .test-case-footer {
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #6a737d;
+        }
+        
+        .test-case-type-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+        }
+        
+        .basic {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .advanced {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .extended {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .kunpeng-status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+        
+        .has-steps {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .no-steps {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .empty-data {
+            font-style: italic;
+            color: #6c757d;
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 99;
+        }
+        
+        .back-to-top.visible {
+            opacity: 1;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .sidebar {
+                width: 280px;
+            }
+            
+            .main-content {
+                margin-left: 280px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 240px;
+            }
+            
+            .main-content {
+                margin-left: 240px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+            
+            .toggle-btn {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 移动端菜单切换按钮 -->
+    <button class="toggle-btn" id="toggleSidebar">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- 侧边导航栏 -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>机密计算测试用例</h2>
+            <p>基于Excel文档结构</p>
+        </div>
+        
+        <div class="search-box">
+            <input type="text" placeholder="搜索测试用例..." id="searchInput">
+        </div>
+        
+        <ul class="nav-menu" id="navMenu">
+            <!-- 导航将通过JavaScript动态生成 -->
+        </ul>
+    </nav>
+    
+    <!-- 主内容区域 -->
+    <main class="main-content">
+        <div class="page-header">
+            <h1>机密计算测试用例库</h1>
+            <p>按照技术层面→硬件模块→技术要求→测试用例类型的层级结构展示</p>
+        </div>
+        
+        <div id="contentArea">
+            <!-- 内容将通过JavaScript动态生成 -->
+        </div>
+    </main>
+    
+    <!-- 返回顶部按钮 -->
+    <button class="back-to-top" id="backToTop">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    
+    <script>
+        // 测试用例数据 - 基于Excel文档结构
+        const testCasesData = {
+            "可信硬件层": {
+                "6.1.1 硬件隔离模块": {
+                    "requirements": [
+                        "应支持硬件隔离机制，将硬件资源隔离成安全资源和普通资源，并为上层软件提供安全状态和普通状态两种执行状态，硬件资源包含但不限于内存、片上I/O等；",
+                        "应保证机密计算环境使用的硬件资源不被其他环境访问；",
+                        "应确保不同内存映射表间的相互隔离性，确保内存映射表不被非法篡改、破坏。"
+                    ],
+                    "testCases": {
+                        "人工检查": {
+                            "人工审查": [
+                                {
+                                    "id": 1,
+                                    "name": "硬件隔离模块人工审查",
+                                    "content": "6.1.1 a)b)c)",
+                                    "purpose": "隔离方案安全",
+                                    "steps": "1、审查厂商提供的隔离方案设计，评估是否安全",
+                                    "type": "基础用例",
+                                    "kunpeng": "已有用例但无具体指标",
+                                    "notes": "已有用例，但无具体指标是指：该条主要评估方案是否安全，但方案应该满足哪些点暂无具体指标，此项是否可以抽象出方案设计关键指标项，或提出该方案应包含哪些项，由厂商解答或在资料中明示。",
+                                    "description": "人工审查厂商针对硬件隔离模块提供的隔离方案设计，评估是否安全",
+                                    "package": "1_1"
+                                }
+                            ]
+                        },
+                        "功能用例": {
+                            "硬件隔离功能": [
+                                {
+                                    "id": 1,
+                                    "name": "安全内存测试",
+                                    "content": "6.1.1 a)",
+                                    "purpose": "验证机密计算环境是否支持配置安全内存（应该需要在bios配置）",
+                                    "steps": "1、启动服务器并配置安全内存256G;<br>2、进入HOST OS，查看当前内存，有预期结果1；",
+                                    "type": "基础用例",
+                                    "kunpeng": "已有测试步骤",
+                                    "notes": "",
+                                    "description": "检查机密计算环境安全内存配置功能的存在性，验证机密计算平台是否具备安全内存配置功能",
+                                    "package": "1_1"
+                                }
+                            ]
+                        },
+                        "安全用例": {
+                            "硬件资源数据完整性": [
+                                {
+                                    "id": 71,
+                                    "name": "内存数据完整性测试",
+                                    "content": "6.1.1 a)b)",
+                                    "purpose": "验证机密计算平台内存的数据不被物理攻击者访问",
+                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，使得内存中的安全区部分存在可信数据；<br>3、通过BIOS、故障注入等方式访问或修改内存中的安全区部分数据，探测是否可以访问。",
+                                    "type": "高阶用例",
+                                    "kunpeng": "无测试步骤",
+                                    "notes": "",
+                                    "description": "确保内存数据的完整性，验证机密计算平台内存的数据是否能抵御物理攻击者访问",
+                                    "package": "4_2"
+                                },
+                                {
+                                    "id": 70,
+                                    "name": "CPU数据完整性测试",
+                                    "content": "6.1.1 a)b)",
+                                    "purpose": "验证机密计算平台CPU的数据不被物理攻击者访问",
+                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，使得安全核中的寄存器等存在可信数据；<br>3、通过BIOS、故障注入等方式访问或修改安全核中的寄存器等数据，探测是否可以访问。",
+                                    "type": "高阶用例",
+                                    "kunpeng": "无测试步骤",
+                                    "notes": "",
+                                    "description": "确保CPU数据的完整性，验证机密计算平台CPU的数据是否能抵御物理攻击者访问",
+                                    "package": "4_1"
+                                },
+                                {
+                                    "id": 72,
+                                    "name": "I/O设备数据完整性测试",
+                                    "content": "6.1.1 a)b)",
+                                    "purpose": "验证机密计算平台I/O设备的数据不被物理攻击者访问",
+                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，并在可信程序中进行可信I/O操作；<br>3、通过BIOS、故障注入等方式访问或修改可信I/O数据，探测是否可以访问。",
+                                    "type": "高阶用例",
+                                    "kunpeng": "无测试步骤",
+                                    "notes": "",
+                                    "description": "确保I/O设备数据的完整性，验证机密计算平台CPU的数据是否能抵御物理攻击者访问",
+                                    "package": "4_2"
+                                }
+                            ],
+                            "硬件资源机密性": [
+                                {
+                                    "id": 55,
+                                    "name": "内存数据隔离安全测试",
+                                    "content": "6.1.1 a)b)",
+                                    "purpose": "验证机密计算平台内存的数据不被普通环境虚拟机访问",
+                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，使得内存中的安全区部分存在可信数据；<br>3、创建普通环境虚拟机，并在普通环境虚拟机中访问内存中的安全区部分数据，探测是否可以访问。",
+                                    "type": "基础用例",
+                                    "kunpeng": "已有测试步骤",
+                                    "notes": "",
+                                    "description": "针对机密计算平台内存的数据安全性进行测试，验证是否存在有效的隔离机制阻止普通虚拟机访问受保护的机密计算平台内存的数据",
+                                    "package": "1_2"
+                                },
+                                {
+                                    "id": 63,
+                                    "name": "内存数据隔离安全测试",
+                                    "content": "6.1.1 a)b)",
+                                    "purpose": "验证机密计算平台内存的数据不被普通环境容器访问",
+                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，使得安全核中的寄存器等存在可信数据；<br>3、创建普通环境容器，并在普通环境容器中访问安全核中的寄存器等数据，探测是否可以访问。",
+                                    "type": "基础用例",
+                                    "kunpeng": "无测试步骤",
+                                    "notes": "",
+                                    "description": "针对机密计算平台内存的数据安全性进行测试，验证是否存在有效的隔离机制阻止普通环境容器访问受保护的机密计算平台内存的数据",
+                                    "package": "1_2"
+                                },
+                                {
+                                    "id": 47,
+                                    "name": "内存数据隔离安全测试",
+                                    "content": "6.1.1 a)b)",
+                                    "purpose": "验证机密计算平台内存的数据不被Hypervisor访问",
+                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，使得内存中的安全区部分存在可信数据；<br>3、从Hypervisor侧访问内存中的安全区部分数据，探测是否可以访问。",
+                                    "type": "基础用例",
+                                    "kunpeng": "已有测试步骤",
+                                    "notes": "",
+                                    "description": "针对机密计算平台内存的数据安全性进行测试，验证是否存在有效的隔离机制阻止Hypervisor访问受保护的机密计算平台内存的数据",
+                                    "package": "2_1"
+                                },
+                                {
+                                    "id": 39,
+                                    "name": "内存数据隔离安全测试",
+                                    "content": "6.1.1 a)b)",
+                                    "purpose": "验证机密计算平台内存的数据不被REE访问",
+                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，使得内存中的安全区部分存在可信数据；<br>3、从REE侧访问内存中的安全区部分数据，探测是否可以访问。",
+                                    "type": "基础用例",
+                                    "kunpeng": "已有测试步骤",
+                                    "notes": "",
+                                    "description": "针对机密计算平台内存的数据安全性进行测试，验证是否存在有效的隔离机制阻止REE访问受保护的机密计算平台内存的数据",
+                                    "package": "1_1"
+                                },
+                                {
+                                    "id": "xx",
+                                    "name": "内存数据隔离安全测试",
+                                    "content": "6.1.1 a)b)",
+                                    "purpose": "验证机密虚机运行时保存在共享内存中的机密数据不被普通环境虚拟机访问",
+                                    "steps": "1、读取共享内存<br>2、探测机密虚机的运行时保存在共享内存中的机密数据是否可以访问、篡改",
+                                    "type": "扩展用例",
+                                    "kunpeng": "",
+                                    "notes": "",
+                                    "description": "针对机密计算平台内存的数据安全性进行测试，验证是否存在有效的隔离机制阻止普通环境虚拟机访问机密虚机运行时保存在共享内存中的机密数据",
+                                    "package": ""
+                                },
+                                {
+                                    "id": "xx",
+                                    "name": "内存数据隔离安全测试",
+                                    "content": "6.1.1 a)b)",
+                                    "purpose": "验证机密虚机运行时保存在共享内存中的机密数据不被恶意机密虚拟机访问",
+                                    "steps": "1、读取共享内存<br>2、探测机密虚机的运行时保存在共享内存中的机密数据是否可以访问、篡改",
+                                    "type": "扩展用例",
+                                    "kunpeng": "",
+                                    "notes": "",
+                                    "description": "针对机密计算平台内存的数据安全性进行测试，验证是否存在有效的隔离机制阻止恶意机密虚拟机访问机密虚机运行时保存在共享内存中的机密数据",
+                                    "package": ""
+                                },
+                                {
+                                    "id": 46,
+                                    "name": "CPU数据隔离安全测试",
+                                    "content": "6.1.1 a)b)",
+                                    "purpose": "验证机密计算平台CPU的数据不被Hypervisor访问",
+                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，使得安全核中的寄存器等存在可信数据；<br>3、从Hypervisor侧访问安全核中的寄存器等数据，探测是否可以访问。",
+                                    "type": "基础用例",
+                                    "kunpeng": "无测试步骤",
+                                    "notes": "",
+                                    "description": "针对机密计算平台CPU的数据安全性进行测试，验证是否存在有效的隔离机制阻止Hypervisor访问受保护的机密计算平台CPU的数据",
+                                    "package": "2_1"
+                                },
+                                {
+                                    "id": 54,
+                                    "name": "CPU数据隔离安全测试",
+                                    "content": "6.1.1 a)b)",
+                                    "purpose": "验证机密计算平台CPU的数据不被普通环境虚拟机访问",
+                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，使得安全核中的寄存器等存在可信数据；<br>3、创建普通环境虚拟机，并在普通环境虚拟机中访问安全核中的寄存器等数据，探测是否可以访问。",
+                                    "type": "基础用例",
+                                    "kunpeng": "无测试步骤",
+                                    "notes": "",
+                                    "description": "针对机密计算平台CPU的数据安全性进行测试，验证是否存在有效的隔离机制阻止普通环境虚拟机访问受保护的机密计算平台CPU的数据",
+                                    "package": "1_2"
+                                },
+                                {
+                                    "id": 62,
+                                    "name": "CPU数据隔离安全测试",
+                                    "content": "6.1.1 a)b)",
+                                    "purpose": "验证机密计算平台CPU的数据不被普通环境容器访问",
+                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，使得安全核中的寄存器等存在可信数据；<br>3、创建普通环境容器，并在普通环境容器中访问安全核中的寄存器等数据，探测是否可以访问。",
+                                    "type": "基础用例",
+                                    "kunpeng": "无测试步骤",
+                                    "notes": "",
+                                    "description": "针对机密计算平台CPU的数据安全性进行测试，验证是否存在有效的隔离机制阻止普通环境容器访问受保护的机密计算平台CPU的数据",
+                                    "package": "1_2"
+                                },
+                                {
+                                    "id": 38,
+                                    "name": "CPU数据隔离安全测试",
+                                    "content": "6.1.1 a)b)",
+                                    "purpose": "验证机密计算平台CPU的数据不被REE访问",
+                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，使得安全核中的寄存器等存在可信数据；<br>3、从REE侧访问安全核中的寄存器等数据，探测是否可以访问。",
+                                    "type": "基础用例",
+                                    "kunpeng": "无测试步骤",
+                                    "notes": "",
+                                    "description": "针对机密计算平台CPU的数据安全性进行测试，验证是否存在有效的隔离机制阻止REE访问受保护的机密计算平台CPU的数据",
+                                    "package": "1_1"
+                                },
+                                {
+                                    "id": 48,
+                                    "name": "I/O设备（磁盘、加速卡、网卡）数据隔离安全测试",
+                                    "content": "6.1.1 a)b)",
+                                    "purpose": "验证机密计算平台I/O设备的数据不被Hypervisor访问、篡改",
+                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，并在可信程序中进行可信I/O操作；<br>3、从Hypervisor侧访问可信I/O数据，探测是否可以访问、篡改。",
+                                    "type": "基础用例",
+                                    "kunpeng": "无测试步骤",
+                                    "notes": "",
+                                    "description": "针对机密计算平台I/O设备的数据安全性进行测试，验证是否存在有效的隔离机制阻止Hypervisor访问受保护的机密计算平台I/O设备的数据",
+                                    "package": "2_2"
+                                },
+                                {
+                                    "id": 56,
+                                    "name": "I/O设备（磁盘、加速卡、网卡）数据隔离安全测试",
+                                    "content": "6.1.1 a)b)",
+                                    "purpose": "验证机密计算平台I/O设备的数据不被普通环境虚拟机访问、篡改",
+                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，并在可信程序中进行可信I/O操作；<br>3、创建普通环境虚拟机，并在普通环境虚拟机中访问可信I/O数据，探测是否可以访问、篡改。",
+                                    "type": "基础用例",
+                                    "kunpeng": "无测试步骤",
+                                    "notes": "",
+                                    "description": "针对机密计算平台I/O设备的数据安全性进行测试，验证是否存在有效的隔离机制阻止普通环境虚拟机访问受保护的机密计算平台I/O设备的数据",
+                                    "package": "1_1"
+                                },
+                                {
+                                    "id": 64,
+                                    "name": "I/O设备（磁盘、加速卡、网卡）数据隔离安全测试",
+                                    "content": "6.1.1 a)b)",
+                                    "purpose": "验证机密计算平台I/O设备的数据不被普通环境容器访问、篡改",
+                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，并在可信程序中进行可信I/O操作；<br>3、创建普通环境容器，并在普通环境容器中访问可信I/O数据，探测是否可以访问、篡改。",
+                                    "type": "基础用例",
+                                    "kunpeng": "无测试步骤",
+                                    "notes": "",
+                                    "description": "针对机密计算平台I/O设备的数据安全性进行测试，验证是否存在有效的隔离机制阻止普通环境容器访问受保护的机密计算平台I/O设备的数据",
+                                    "package": "1_2"
+                                },
+                                {
+                                    "id": 40,
+                                    "name": "I/O设备（磁盘、加速卡、网卡）数据隔离安全测试",
+                                    "content": "6.1.1 a)b)",
+                                    "purpose": "验证机密计算平台I/O设备的数据不被REE访问、篡改",
+                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，并在可信程序中进行可信I/O操作；<br>3、从REE侧访问可信I/O数据，探测是否可以访问、篡改。",
+                                    "type": "基础用例",
+                                    "kunpeng": "无测试步骤",
+                                    "notes": "",
+                                    "description": "针对机密计算平台I/O设备的数据安全性进行测试，验证是否存在有效的隔离机制阻止REE访问受保护的机密计算平台I/O设备的数据",
+                                    "package": "1_2"
+                                },
+                                {
+                                    "id": "xx",
+                                    "name": "硬件隔离模块逻辑安全性测试",
+                                    "content": "6.1.1 a)b)c)",
+                                    "purpose": "验证机密环境的硬件隔离模块是否存在逻辑安全性问题",
+                                    "steps": "1、启用机密计算平台，开启并初始化硬件隔离模块；<br>2、对硬件隔离模块的功能进行测试；<br>3、检测是否存在逻辑漏洞，若存在漏洞，进行利用。",
+                                    "type": "高阶用例",
+                                    "kunpeng": "无测试步骤",
+                                    "notes": "",
+                                    "description": "验证机密计算环境下硬件隔离模块的逻辑设计否存在潜在缺陷或可利用漏洞，以确保其能有效抵御非预期访问和逻辑层面的攻击，维护机密环境的安全边界。",
+                                    "package": "3_1"
+                                },
+                                {
+                                    "id": "xx",
+                                    "name": "硬件隔离模块渗透攻击安全性测试",
+                                    "content": "6.1.1 a)b)c)",
+                                    "purpose": "验证机密环境下硬件隔离模块是否会受到渗透攻击的威胁",
+                                    "steps": "1、启用机密计算平台，开启并初始化硬件隔离模块；<br>2、适配重构已知渗透攻击（已知漏洞）代码并执行，对硬件隔离模块进行攻击；<br>3、探测攻击者是否能通过渗透攻击窃取机密信息。",
+                                    "type": "高阶用例",
+                                    "kunpeng": "无测试步骤",
+                                    "notes": "",
+                                    "description": "评估机密计算环境下硬件隔离模块的抗渗透能力，验证该模块能否有效抵御恶意渗透行为，保障隔离机制的稳固性",
+                                    "package": "3_2"
+                                },
+                                {
+                                    "id": "xx",
+                                    "name": "硬件隔离模块侧信道攻击安全性测试",
+                                    "content": "6.1.1 a)b)c)",
+                                    "purpose": "验证机密环境下硬件隔离模块是否会受到侧信道攻击的威胁",
+                                    "steps": "1、启用机密计算平台，开启并初始化硬件隔离模块；<br>2、适配重构已知侧信道攻击代码并执行，对硬件隔离模块进行攻击；<br>3、探测攻击者是否能通过侧信道攻击窃取机密信息。",
+                                    "type": "高阶用例",
+                                    "kunpeng": "无测试步骤",
+                                    "notes": "",
+                                    "description": "评估机密计算环境下硬件隔离模块防御侧信道攻击能力，验证该模块能否有效抵御侧信道攻击行为",
+                                    "package": "3_1"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "6.1.2 硬件根密钥": {
+                    "requirements": [
+                        "应保证硬件根密钥不被替换或篡改；",
+                        "应保证硬件根密钥禁止被软件直接访问。"
+                    ],
+                    "testCases": {}
+                },
+                "6.1.3 硬件密码模块": {
+                    "requirements": [
+                        "随机数生成器质量应满足GB/T 32915-2016的要求；",
+                        "派生出的密钥应保证完整性，非授权用户无法访问；",
+                        "密码算法应采用符合密码相关的国际标准、国家标准、行业标准等要求的密码算法，算法应安全可靠。"
+                    ],
+                    "testCases": {}
+                },
+                "6.1.4 内存加密": {
+                    "requirements": [
+                        "应支持对机密计算环境使用的物理内存进行加密，确保物理内存上数据的机密性；",
+                        "应支持密钥无法被外部环境访问；",
+                        "内存加密算法应采用符合密码相关的国际标准、国家标准、行业标准等要求的密码算法，算法应安全可靠；",
+                        "宜支持对机密计算环境中不同信任域间使用不同密钥加密。"
+                    ],
+                    "testCases": {}
+                },
+                "6.1.5 硬件信任根": {
+                    "requirements": [
+                        "应保证硬件信任根不被替换或篡改；",
+                        "应具备物理防护机制。"
+                    ],
+                    "testCases": {}
+                }
+            },
+            "系统软件层": {
+                "6.2.1 可信虚拟化": {
+                    "requirements": [
+                        "应支持创建多个虚拟机，支持虚拟机生命周期管理；",
+                        "应具备管理虚拟机的CPU、内存、外设等硬件资源能力；",
+                        "应支持虚拟机内存数据及应用不被管理程序篡改；",
+                        "宜支持虚拟机热迁移；",
+                        "虚拟机软硬件资源应具备访问控制能力。"
+                    ],
+                    "testCases": {}
+                },
+                "6.2.2 机密计算操作系统": {
+                    "requirements": [
+                        "应提供机密计算环境和普通计算环境的通信机制；",
+                        "应提安全的隔离机制，保证普通计算环境中的应用软件和系统软件在非授权情况下无法访问机密计算环境；",
+                        "宜支持容器化部署；",
+                        "宜经过业界权威测评机构的测评认证。"
+                    ],
+                    "testCases": {}
+                }
+            },
+            "系统服务层": {
+                "6.3.1 隔离计算": {
+                    "requirements": [
+                        "应支持系统软件的隔离性，非机密计算环境的操作系统或其他特权软件在非授权下无法访问该机密计算环境；",
+                        "应确保机密虚拟机之间软硬件资源的隔离性，防止代码及数据的泄露；",
+                        "应支持机密计算应用程序的隔离性，不能越权访问其他机密计算应用程序。"
+                    ],
+                    "testCases": {}
+                },
+                "6.3.2 安全启动": {
+                    "requirements": [
+                        "应支持基于硬件信任根，通过签名验签方法验证机密计算环境启动过程的每一个阶段，以确保机密计算应用程序按照预期行为执行计算任务；非法组件或签名应能被检测出，验证不通过应停止启动流程。",
+                        "应保证安全启动信任链按序逐级验证，不可被恶意绕过。"
+                    ],
+                    "testCases": {}
+                },
+                "6.3.3 可信度量": {
+                    "requirements": [
+                        "应基于硬件信任根建立机密计算环境启动过程中的信任链，对关键固件、操作系统或软件生成度量值；",
+                        "宜支持动态度量，包括但不限于应用程序代码段，动态库代码段，内核代码段等。"
+                    ],
+                    "testCases": {}
+                },
+                "6.3.4 远程证明": {
+                    "requirements": [
+                        "应支持挑战/应答机制，抵抗证明报告的重放攻击；",
+                        "应支持生成机密计算环境的证明报告；",
+                        "应支持生成机密计算应用程序启动时的证明报告；",
+                        "应基于硬件信任根对证明报告签名，保证证明报告的完整性和真实性；",
+                        "宜支持对机密虚拟机、容器内运行的应用程序进行动态度量，保障完整性和真实性验证。"
+                    ],
+                    "testCases": {}
+                },
+                "6.3.5 安全存储": {
+                    "requirements": [
+                        "应支持机密计算环境中的数据保存到外部存储介质中时加密存储，外部存储的加密数据加载到机密计算环境时可正确解密；",
+                        "应保证加密的数据解密后只能被授权实体访问；",
+                        "应保证安全存储所使用密钥的机密性和完整性。"
+                    ],
+                    "testCases": {}
+                },
+                "6.3.6 密码运算": {
+                    "requirements": [
+                        "应支持在机密计算环境执行基础的密码运算，包括加密、解密、签名、验签、杂凑等操作；",
+                        "密码算法应采用符合密码相关的国际标准、国家标准、行业标准等要求的密码算法，算法应安全可靠。"
+                    ],
+                    "testCases": {}
+                },
+                "6.3.7 密钥管理": {
+                    "requirements": [
+                        "应使用安全的方式派生密钥，密钥（除公钥外）应以密文形式存储或备份或归档在可信的介质中，且无法被非授权访问、使用、修改和替换；",
+                        "密钥分发过程中应采取身份认证等方式保障分发者/接收者身份的真实性，且保障密钥的机密性和完整性；",
+                        "应确保对称密钥与非对称私钥只能在机密计算环境内部（包含TEE与硬件密钥模块内）使用。",
+                        "密钥在生命周期结束、发生泄漏或有泄漏风险时应支持密钥销毁。",
+                        "密钥仅能在机密计算环境中使用，且不支持明文导出，支持密钥迁移。"
+                    ],
+                    "testCases": {}
+                },
+                "6.3.8 异构设备互联": {
+                    "requirements": [
+                        "机密计算环境与I/O设备的通信应支持访问控制机制或加密机制，确保数据的通信安全；",
+                        "应保证异构机密计算的性能损耗符合业务要求，评价方法可参考附录B。"
+                    ],
+                    "testCases": {}
+                },
+                "6.3.9 数据封装": {
+                    "requirements": [
+                        "封装密钥应保证机密性与完整性；",
+                        "封装密钥应基于硬件根密钥派生；",
+                        "封装的数据应只能被授权的硬件或服务访问，数据解封只能在数据封装的环境。"
+                    ],
+                    "testCases": {}
+                },
+                "6.3.10 安全信道": {
+                    "requirements": [
+                        "应保证安全信道中的数据不被非授权访问与篡改，建立信道双方应进行身份认证。"
+                    ],
+                    "testCases": {}
+                },
+                "6.3.11 密码硬件加速": {
+                    "requirements": [
+                        "机密计算环境宜提供密码硬件加速功能，提升密码运算效率；",
+                        "密码算法应采用符合密码相关的国际标准、国家标准、行业标准等要求的密码算法，算法应安全可靠。"
+                    ],
+                    "testCases": {}
+                }
+            }
+        };
+
+        // 生成导航菜单
+        function generateNavigation() {
+            const navMenu = document.getElementById('navMenu');
+            navMenu.innerHTML = '';
+            
+            for (const [techLevel, modules] of Object.entries(testCasesData)) {
+                const techLevelId = techLevel.replace(/\s+/g, '-');
+                const techLevelItem = document.createElement('li');
+                techLevelItem.className = 'nav-item';
+                
+                const techLevelLink = document.createElement('a');
+                techLevelLink.href = `#${techLevelId}`;
+                techLevelLink.innerHTML = `<i class="fas fa-layer-group"></i> ${techLevel}`;
+                
+                techLevelItem.appendChild(techLevelLink);
+                
+                const modulesSubmenu = document.createElement('ul');
+                modulesSubmenu.className = 'submenu';
+                
+                for (const [moduleName, moduleData] of Object.entries(modules)) {
+                    const moduleId = `${techLevelId}-${moduleName.replace(/\s+/g, '-')}`;
+                    const moduleItem = document.createElement('li');
+                    moduleItem.className = 'nav-item';
+                    
+                    const moduleLink = document.createElement('a');
+                    moduleLink.href = `#${moduleId}`;
+                    moduleLink.innerHTML = `<i class="fas fa-microchip"></i> ${moduleName}`;
+                    
+                    moduleItem.appendChild(moduleLink);
+                    
+                    // 如果有测试用例，添加子菜单
+                    if (Object.keys(moduleData.testCases).length > 0) {
+                        const testTypesSubmenu = document.createElement('ul');
+                        testTypesSubmenu.className = 'submenu';
+                        
+                        for (const [testType, testGroups] of Object.entries(moduleData.testCases)) {
+                            const testTypeId = `${moduleId}-${testType.replace(/\s+/g, '-')}`;
+                            const testTypeItem = document.createElement('li');
+                            testTypeItem.className = 'nav-item';
+                            
+                            const testTypeLink = document.createElement('a');
+                            testTypeLink.href = `#${testTypeId}`;
+                            testTypeLink.innerHTML = `<i class="fas fa-cubes"></i> ${testType}`;
+                            
+                            testTypeItem.appendChild(testTypeLink);
+                            
+                            // 如果有测试组，添加子菜单
+                            if (Object.keys(testGroups).length > 0) {
+                                const testGroupsSubmenu = document.createElement('ul');
+                                testGroupsSubmenu.className = 'submenu';
+                                
+                                for (const [testGroup, testCases] of Object.entries(testGroups)) {
+                                    const testGroupId = `${testTypeId}-${testGroup.replace(/\s+/g, '-')}`;
+                                    const testGroupItem = document.createElement('li');
+                                    testGroupItem.className = 'nav-item';
+                                    
+                                    const testGroupLink = document.createElement('a');
+                                    testGroupLink.href = `#${testGroupId}`;
+                                    testGroupLink.innerHTML = `<i class="fas fa-layer-group"></i> ${testGroup}`;
+                                    
+                                    testGroupItem.appendChild(testGroupLink);
+                                    testGroupsSubmenu.appendChild(testGroupItem);
+                                }
+                                
+                                testTypeItem.appendChild(testGroupsSubmenu);
+                            }
+                            
+                            testTypesSubmenu.appendChild(testTypeItem);
+                        }
+                        
+                        moduleItem.appendChild(testTypesSubmenu);
+                    }
+                    
+                    modulesSubmenu.appendChild(moduleItem);
+                }
+                
+                techLevelItem.appendChild(modulesSubmenu);
+                navMenu.appendChild(techLevelItem);
+            }
+        }
+
+        // 生成内容区域
+        function generateContent() {
+            const contentArea = document.getElementById('contentArea');
+            contentArea.innerHTML = '';
+            
+            for (const [techLevel, modules] of Object.entries(testCasesData)) {
+                const techLevelId = techLevel.replace(/\s+/g, '-');
+                const techLevelSection = document.createElement('section');
+                techLevelSection.className = 'section';
+                techLevelSection.id = techLevelId;
+                
+                const techLevelHeader = document.createElement('div');
+                techLevelHeader.className = 'section-header';
+                techLevelHeader.innerHTML = `<h2 class="section-title">${techLevel}</h2>`;
+                
+                techLevelSection.appendChild(techLevelHeader);
+                
+                for (const [moduleName, moduleData] of Object.entries(modules)) {
+                    const moduleId = `${techLevelId}-${moduleName.replace(/\s+/g, '-')}`;
+                    
+                    const moduleSubtitle = document.createElement('h3');
+                    moduleSubtitle.className = 'section-subtitle';
+                    moduleSubtitle.id = moduleId;
+                    moduleSubtitle.textContent = moduleName;
+                    
+                    techLevelSection.appendChild(moduleSubtitle);
+                    
+                    // 技术要求
+                    if (moduleData.requirements && moduleData.requirements.length > 0) {
+                        const requirementsTitle = document.createElement('h4');
+                        requirementsTitle.textContent = '技术要求：';
+                        requirementsTitle.style.margin = '15px 0 10px';
+                        
+                        techLevelSection.appendChild(requirementsTitle);
+                        
+                        const requirementsList = document.createElement('ol');
+                        requirementsList.className = 'requirements-list';
+                        
+                        moduleData.requirements.forEach(req => {
+                            const reqItem = document.createElement('li');
+                            reqItem.innerHTML = req;
+                            requirementsList.appendChild(reqItem);
+                        });
+                        
+                        techLevelSection.appendChild(requirementsList);
+                    }
+                    
+                    // 测试用例
+                    if (moduleData.testCases && Object.keys(moduleData.testCases).length > 0) {
+                        for (const [testType, testGroups] of Object.entries(moduleData.testCases)) {
+                            const testTypeId = `${moduleId}-${testType.replace(/\s+/g, '-')}`;
+                            const testTypeTitle = document.createElement('h4');
+                            testTypeTitle.className = 'section-subtitle-2';
+                            testTypeTitle.id = testTypeId;
+                            testTypeTitle.textContent = `测试用例类型：${testType}`;
+                            
+                            techLevelSection.appendChild(testTypeTitle);
+                            
+                            for (const [testGroup, testCases] of Object.entries(testGroups)) {
+                                if (testCases.length > 0) {
+                                    const testGroupId = `${testTypeId}-${testGroup.replace(/\s+/g, '-')}`;
+                                    const testGroupTitle = document.createElement('h5');
+                                    testGroupTitle.className = 'section-subtitle-2';
+                                    testGroupTitle.id = testGroupId;
+                                    testGroupTitle.textContent = `测试用例组：${testGroup}`;
+                                    
+                                    techLevelSection.appendChild(testGroupTitle);
+                                    
+                                    testCases.forEach(testCase => {
+                                        const testCaseCard = document.createElement('div');
+                                        testCaseCard.className = 'test-case-card';
+                                        
+                                        const testCaseHeader = document.createElement('div');
+                                        testCaseHeader.className = 'test-case-header';
+                                        
+                                        const testCaseTitle = document.createElement('h5');
+                                        testCaseTitle.className = 'test-case-title';
+                                        testCaseTitle.textContent = testCase.name;
+                                        
+                                        const testCaseId = document.createElement('span');
+                                        testCaseId.className = 'test-case-id';
+                                        testCaseId.textContent = `ID: ${testCase.id}`;
+                                        
+                                        testCaseHeader.appendChild(testCaseTitle);
+                                        testCaseHeader.appendChild(testCaseId);
+                                        
+                                        const testCaseContent = document.createElement('div');
+                                        testCaseContent.className = 'test-case-content';
+                                        
+                                        testCaseContent.innerHTML = `
+                                            <p><strong>对应内容：</strong>${testCase.content}</p>
+                                            <p><strong>测试目的：</strong>${testCase.purpose}</p>
+                                            <p><strong>测试步骤及输入数据：</strong><br>${testCase.steps}</p>
+                                            <p><strong>测试用例类型：</strong><span class="test-case-type-badge ${getTypeClass(testCase.type)}">${testCase.type}</span></p>
+                                            <p><strong>是否已有鲲鹏测试步骤：</strong><span class="kunpeng-status ${testCase.kunpeng.includes('已有') ? 'has-steps' : 'no-steps'}">${testCase.kunpeng}</span></p>
+                                            ${testCase.notes ? `<p><strong>备注：</strong>${testCase.notes}</p>` : ''}
+                                            <p><strong>测试用例描述：</strong>${testCase.description}</p>
+                                        `;
+                                        
+                                        const testCaseFooter = document.createElement('div');
+                                        testCaseFooter.className = 'test-case-footer';
+                                        testCaseFooter.innerHTML = `
+                                            <span>测试用例包: ${testCase.package}</span>
+                                        `;
+                                        
+                                        testCaseCard.appendChild(testCaseHeader);
+                                        testCaseCard.appendChild(testCaseContent);
+                                        testCaseCard.appendChild(testCaseFooter);
+                                        
+                                        techLevelSection.appendChild(testCaseCard);
+                                    });
+                                }
+                            }
+                        }
+                    } else {
+                        const noTestCasesMsg = document.createElement('div');
+                        noTestCasesMsg.className = 'empty-data';
+                        noTestCasesMsg.textContent = '暂无测试用例，后续可补充。';
+                        
+                        techLevelSection.appendChild(noTestCasesMsg);
+                    }
+                }
+                
+                contentArea.appendChild(techLevelSection);
+            }
+        }
+
+        // 获取测试用例类型对应的CSS类
+        function getTypeClass(type) {
+            switch(type) {
+                case '基础用例': return 'basic';
+                case '高阶用例': return 'advanced';
+                case '扩展用例': return 'extended';
+                default: return 'basic';
+            }
+        }
+
+        // 平滑滚动到锚点
+        function scrollToAnchor(anchorId) {
+            const element = document.getElementById(anchorId);
+            if (element) {
+                window.scrollTo({
+                    top: element.offsetTop - 20,
+                    behavior: 'smooth'
+                });
+            }
+        }
+
+        // 移动端侧边栏切换
+        document.getElementById('toggleSidebar').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+
+        // 导航菜单点击事件
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.nav-item > a')) {
+                const navItem = e.target.closest('.nav-item');
+                const link = e.target.closest('a');
+                const href = link.getAttribute('href');
+                
+                // 如果是内部锚点链接
+                if (href && href.startsWith('#')) {
+                    const anchorId = href.substring(1);
+                    scrollToAnchor(anchorId);
+                    
+                    // 如果是移动端，点击后关闭侧边栏
+                    if (window.innerWidth <= 768) {
+                        document.getElementById('sidebar').classList.remove('active');
+                    }
+                    
+                    e.preventDefault();
+                }
+                
+                // 如果点击的是有子菜单的项，则切换子菜单显示
+                if (navItem.querySelector('.submenu')) {
+                    e.preventDefault();
+                    navItem.classList.toggle('active');
+                }
+            }
+        });
+
+        // 简单搜索功能
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const testCases = document.querySelectorAll('.test-case-card');
+            const sections = document.querySelectorAll('.section');
+            
+            let hasResults = false;
+            
+            testCases.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    card.style.display = 'block';
+                    hasResults = true;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // 如果没有搜索结果，隐藏所有部分
+            sections.forEach(section => {
+                if (!hasResults && searchTerm) {
+                    section.style.display = 'none';
+                } else {
+                    section.style.display = 'block';
+                }
+            });
+        });
+
+        // 返回顶部功能
+        const backToTopBtn = document.getElementById('backToTop');
+        
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                backToTopBtn.classList.add('visible');
+            } else {
+                backToTopBtn.classList.remove('visible');
+            }
+        });
+        
+        backToTopBtn.addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            generateNavigation();
+            generateContent();
+            
+            // 处理页面加载时的锚点
+            if (window.location.hash) {
+                setTimeout(() => {
+                    scrollToAnchor(window.location.hash.substring(1));
+                }, 100);
+            }
+        });
+    </script>
+</body>
+</html>
