@@ -9,6 +9,8 @@
         :root {
             --primary-color: #0366d6;
             --secondary-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
             --bg-color: #f6f8fa;
             --sidebar-bg: #24292e;
             --sidebar-text: #fafbfc;
@@ -62,10 +64,12 @@
         
         .search-box {
             padding: 0 20px 15px;
+            display: flex;
+            gap: 10px;
         }
         
         .search-box input {
-            width: 100%;
+            flex: 1;
             padding: 8px 12px;
             border-radius: 4px;
             border: none;
@@ -75,6 +79,20 @@
         
         .search-box input::placeholder {
             color: rgba(255,255,255,0.5);
+        }
+        
+        .search-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .search-button:hover {
+            background-color: #0256b3;
         }
         
         .nav-menu {
@@ -152,6 +170,9 @@
         
         .page-header {
             margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         
         .page-header h1 {
@@ -163,6 +184,23 @@
         .page-header p {
             color: #586069;
             font-size: 1.1rem;
+        }
+        
+        .back-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.2s;
+        }
+        
+        .back-button:hover {
+            background-color: #0256b3;
         }
         
         .section {
@@ -223,6 +261,13 @@
             margin: 15px 0;
             border-left: 4px solid var(--secondary-color);
             scroll-margin-top: 20px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .test-case-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
         
         .test-case-header {
@@ -342,6 +387,93 @@
             opacity: 1;
         }
         
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            font-size: 1.2rem;
+            color: #6c757d;
+        }
+        
+        .highlight {
+            background-color: yellow;
+            padding: 2px;
+            border-radius: 2px;
+        }
+        
+        .search-results {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 6px;
+        }
+        
+        .search-results.hidden {
+            display: none;
+        }
+        
+        .search-results-count {
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .module-overview {
+            margin-bottom: 30px;
+        }
+        
+        .subdirectory {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .subdirectory-item {
+            background-color: var(--card-bg);
+            border-radius: 6px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .subdirectory-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .subdirectory-item h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .subdirectory-item p {
+            color: #586069;
+            font-size: 0.9rem;
+        }
+        
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: #586069;
+        }
+        
+        .breadcrumb a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .breadcrumb-separator {
+            margin: 0 8px;
+        }
+        
         /* 响应式设计 */
         @media (max-width: 1200px) {
             .sidebar {
@@ -380,6 +512,16 @@
             .toggle-btn {
                 display: block;
             }
+            
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .subdirectory {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -397,6 +539,9 @@
         
         <div class="search-box">
             <input type="text" placeholder="搜索测试用例..." id="searchInput">
+            <button class="search-button" id="searchButton">
+                <i class="fas fa-search"></i>
+            </button>
         </div>
         
         <ul class="nav-menu" id="navMenu">
@@ -407,12 +552,31 @@
     <!-- 主内容区域 -->
     <main class="main-content">
         <div class="page-header">
-            <h1>机密计算测试用例库</h1>
-            <p>按照技术层面→硬件模块→技术要求→测试用例类型的层级结构展示</p>
+            <div>
+                <h1 id="pageTitle">机密计算测试用例库</h1>
+                <p id="pageDescription">按照技术层面→硬件模块→技术要求→测试用例类型的层级结构展示</p>
+            </div>
+            <button class="back-button" id="backButton" style="display: none;">
+                <i class="fas fa-arrow-left"></i> 返回上级
+            </button>
         </div>
         
+        <!-- 面包屑导航 -->
+        <div class="breadcrumb" id="breadcrumb">
+            <a href="#" id="homeBreadcrumb">首页</a>
+        </div>
+        
+        <!-- 搜索结果显示 -->
+        <div class="search-results hidden" id="searchResults">
+            <div class="search-results-count" id="searchResultsCount"></div>
+            <div id="searchResultsContent"></div>
+        </div>
+        
+        <!-- 内容区域 -->
         <div id="contentArea">
-            <!-- 内容将通过JavaScript动态生成 -->
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin"></i> 正在加载测试用例数据...
+            </div>
         </div>
     </main>
     
@@ -422,436 +586,698 @@
     </button>
     
     <script>
-        // 测试用例数据 - 基于Excel文档结构
+        // 测试用例数据 - 基于Excel文档完整结构
         const testCasesData = {
             "可信硬件层": {
                 "6.1.1 硬件隔离模块": {
+                    "description": "硬件隔离模块包含可信执行控制单元及隔离内存空间，为机密计算环境提供硬件隔离的硬件基础。",
                     "requirements": [
-                        "应支持硬件隔离机制，将硬件资源隔离成安全资源和普通资源，并为上层软件提供安全状态和普通状态两种执行状态，硬件资源包含但不限于内存、片上I/O等；",
-                        "应保证机密计算环境使用的硬件资源不被其他环境访问；",
-                        "应确保不同内存映射表间的相互隔离性，确保内存映射表不被非法篡改、破坏。"
+                        "硬件隔离模块包含可信执行控制单元及隔离内存空间，为机密计算环境提供硬件隔离的硬件基础。硬件隔离模块满足以下要求：",
+                        "a) 应支持硬件隔离机制，将硬件资源隔离成安全资源和普通资源，并为上层软件提供安全状态和普通状态两种执行状态，硬件资源包含但不限于内存、片上I/O等；",
+                        "b) 应保证机密计算环境使用的硬件资源不被其他环境访问；",
+                        "c) 应确保不同内存映射表间的相互隔离性，确保内存映射表不被非法篡改、破坏。"
                     ],
                     "testCases": {
                         "人工检查": {
-                            "人工审查": [
-                                {
-                                    "id": 1,
-                                    "name": "硬件隔离模块人工审查",
-                                    "content": "6.1.1 a)b)c)",
-                                    "purpose": "隔离方案安全",
-                                    "steps": "1、审查厂商提供的隔离方案设计，评估是否安全",
-                                    "type": "基础用例",
-                                    "kunpeng": "已有用例但无具体指标",
-                                    "notes": "已有用例，但无具体指标是指：该条主要评估方案是否安全，但方案应该满足哪些点暂无具体指标，此项是否可以抽象出方案设计关键指标项，或提出该方案应包含哪些项，由厂商解答或在资料中明示。",
-                                    "description": "人工审查厂商针对硬件隔离模块提供的隔离方案设计，评估是否安全",
-                                    "package": "1_1"
-                                }
-                            ]
+                            "description": "通过人工审查方式验证硬件隔离模块的安全性",
+                            "testGroups": {
+                                "人工审查": [
+                                    {
+                                        "id": 1,
+                                        "name": "硬件隔离模块人工审查",
+                                        "content": "6.1.1 a)b)c)",
+                                        "purpose": "隔离方案安全",
+                                        "steps": "1、审查厂商提供的隔离方案设计，评估是否安全",
+                                        "type": "基础用例",
+                                        "kunpeng": "已有用例但无具体指标",
+                                        "notes": "已有用例，但无具体指标是指：该条主要评估方案是否安全，但方案应该满足哪些点暂无具体指标，此项是否可以抽象出方案设计关键指标项，或提出该方案应包含哪些项，由厂商解答或在资料中明示。",
+                                        "description": "人工审查厂商针对硬件隔离模块提供的隔离方案设计，评估是否安全",
+                                        "package": "1_1"
+                                    }
+                                ]
+                            }
                         },
                         "功能用例": {
-                            "硬件隔离功能": [
-                                {
-                                    "id": 1,
-                                    "name": "安全内存测试",
-                                    "content": "6.1.1 a)",
-                                    "purpose": "验证机密计算环境是否支持配置安全内存（应该需要在bios配置）",
-                                    "steps": "1、启动服务器并配置安全内存256G;<br>2、进入HOST OS，查看当前内存，有预期结果1；",
-                                    "type": "基础用例",
-                                    "kunpeng": "已有测试步骤",
-                                    "notes": "",
-                                    "description": "检查机密计算环境安全内存配置功能的存在性，验证机密计算平台是否具备安全内存配置功能",
-                                    "package": "1_1"
-                                }
-                            ]
+                            "description": "验证硬件隔离模块的功能实现",
+                            "testGroups": {
+                                "硬件隔离功能": [
+                                    {
+                                        "id": 1,
+                                        "name": "安全内存测试",
+                                        "content": "6.1.1 a)",
+                                        "purpose": "验证机密计算环境是否支持配置安全内存（应该需要在bios配置）",
+                                        "steps": "1、启动服务器并配置安全内存256G;<br>2、进入HOST OS，查看当前内存，有预期结果1；",
+                                        "type": "基础用例",
+                                        "kunpeng": "已有测试步骤",
+                                        "notes": "",
+                                        "description": "检查机密计算环境安全内存配置功能的存在性，验证机密计算平台是否具备安全内存配置功能",
+                                        "package": "1_1"
+                                    }
+                                ]
+                            }
                         },
                         "安全用例": {
-                            "硬件资源数据完整性": [
-                                {
-                                    "id": 71,
-                                    "name": "内存数据完整性测试",
-                                    "content": "6.1.1 a)b)",
-                                    "purpose": "验证机密计算平台内存的数据不被物理攻击者访问",
-                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，使得内存中的安全区部分存在可信数据；<br>3、通过BIOS、故障注入等方式访问或修改内存中的安全区部分数据，探测是否可以访问。",
-                                    "type": "高阶用例",
-                                    "kunpeng": "无测试步骤",
-                                    "notes": "",
-                                    "description": "确保内存数据的完整性，验证机密计算平台内存的数据是否能抵御物理攻击者访问",
-                                    "package": "4_2"
-                                },
-                                {
-                                    "id": 70,
-                                    "name": "CPU数据完整性测试",
-                                    "content": "6.1.1 a)b)",
-                                    "purpose": "验证机密计算平台CPU的数据不被物理攻击者访问",
-                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，使得安全核中的寄存器等存在可信数据；<br>3、通过BIOS、故障注入等方式访问或修改安全核中的寄存器等数据，探测是否可以访问。",
-                                    "type": "高阶用例",
-                                    "kunpeng": "无测试步骤",
-                                    "notes": "",
-                                    "description": "确保CPU数据的完整性，验证机密计算平台CPU的数据是否能抵御物理攻击者访问",
-                                    "package": "4_1"
-                                },
-                                {
-                                    "id": 72,
-                                    "name": "I/O设备数据完整性测试",
-                                    "content": "6.1.1 a)b)",
-                                    "purpose": "验证机密计算平台I/O设备的数据不被物理攻击者访问",
-                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，并在可信程序中进行可信I/O操作；<br>3、通过BIOS、故障注入等方式访问或修改可信I/O数据，探测是否可以访问。",
-                                    "type": "高阶用例",
-                                    "kunpeng": "无测试步骤",
-                                    "notes": "",
-                                    "description": "确保I/O设备数据的完整性，验证机密计算平台CPU的数据是否能抵御物理攻击者访问",
-                                    "package": "4_2"
-                                }
-                            ],
-                            "硬件资源机密性": [
-                                {
-                                    "id": 55,
-                                    "name": "内存数据隔离安全测试",
-                                    "content": "6.1.1 a)b)",
-                                    "purpose": "验证机密计算平台内存的数据不被普通环境虚拟机访问",
-                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，使得内存中的安全区部分存在可信数据；<br>3、创建普通环境虚拟机，并在普通环境虚拟机中访问内存中的安全区部分数据，探测是否可以访问。",
-                                    "type": "基础用例",
-                                    "kunpeng": "已有测试步骤",
-                                    "notes": "",
-                                    "description": "针对机密计算平台内存的数据安全性进行测试，验证是否存在有效的隔离机制阻止普通虚拟机访问受保护的机密计算平台内存的数据",
-                                    "package": "1_2"
-                                },
-                                {
-                                    "id": 63,
-                                    "name": "内存数据隔离安全测试",
-                                    "content": "6.1.1 a)b)",
-                                    "purpose": "验证机密计算平台内存的数据不被普通环境容器访问",
-                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，使得安全核中的寄存器等存在可信数据；<br>3、创建普通环境容器，并在普通环境容器中访问安全核中的寄存器等数据，探测是否可以访问。",
-                                    "type": "基础用例",
-                                    "kunpeng": "无测试步骤",
-                                    "notes": "",
-                                    "description": "针对机密计算平台内存的数据安全性进行测试，验证是否存在有效的隔离机制阻止普通环境容器访问受保护的机密计算平台内存的数据",
-                                    "package": "1_2"
-                                },
-                                {
-                                    "id": 47,
-                                    "name": "内存数据隔离安全测试",
-                                    "content": "6.1.1 a)b)",
-                                    "purpose": "验证机密计算平台内存的数据不被Hypervisor访问",
-                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，使得内存中的安全区部分存在可信数据；<br>3、从Hypervisor侧访问内存中的安全区部分数据，探测是否可以访问。",
-                                    "type": "基础用例",
-                                    "kunpeng": "已有测试步骤",
-                                    "notes": "",
-                                    "description": "针对机密计算平台内存的数据安全性进行测试，验证是否存在有效的隔离机制阻止Hypervisor访问受保护的机密计算平台内存的数据",
-                                    "package": "2_1"
-                                },
-                                {
-                                    "id": 39,
-                                    "name": "内存数据隔离安全测试",
-                                    "content": "6.1.1 a)b)",
-                                    "purpose": "验证机密计算平台内存的数据不被REE访问",
-                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，使得内存中的安全区部分存在可信数据；<br>3、从REE侧访问内存中的安全区部分数据，探测是否可以访问。",
-                                    "type": "基础用例",
-                                    "kunpeng": "已有测试步骤",
-                                    "notes": "",
-                                    "description": "针对机密计算平台内存的数据安全性进行测试，验证是否存在有效的隔离机制阻止REE访问受保护的机密计算平台内存的数据",
-                                    "package": "1_1"
-                                },
-                                {
-                                    "id": "xx",
-                                    "name": "内存数据隔离安全测试",
-                                    "content": "6.1.1 a)b)",
-                                    "purpose": "验证机密虚机运行时保存在共享内存中的机密数据不被普通环境虚拟机访问",
-                                    "steps": "1、读取共享内存<br>2、探测机密虚机的运行时保存在共享内存中的机密数据是否可以访问、篡改",
-                                    "type": "扩展用例",
-                                    "kunpeng": "",
-                                    "notes": "",
-                                    "description": "针对机密计算平台内存的数据安全性进行测试，验证是否存在有效的隔离机制阻止普通环境虚拟机访问机密虚机运行时保存在共享内存中的机密数据",
-                                    "package": ""
-                                },
-                                {
-                                    "id": "xx",
-                                    "name": "内存数据隔离安全测试",
-                                    "content": "6.1.1 a)b)",
-                                    "purpose": "验证机密虚机运行时保存在共享内存中的机密数据不被恶意机密虚拟机访问",
-                                    "steps": "1、读取共享内存<br>2、探测机密虚机的运行时保存在共享内存中的机密数据是否可以访问、篡改",
-                                    "type": "扩展用例",
-                                    "kunpeng": "",
-                                    "notes": "",
-                                    "description": "针对机密计算平台内存的数据安全性进行测试，验证是否存在有效的隔离机制阻止恶意机密虚拟机访问机密虚机运行时保存在共享内存中的机密数据",
-                                    "package": ""
-                                },
-                                {
-                                    "id": 46,
-                                    "name": "CPU数据隔离安全测试",
-                                    "content": "6.1.1 a)b)",
-                                    "purpose": "验证机密计算平台CPU的数据不被Hypervisor访问",
-                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，使得安全核中的寄存器等存在可信数据；<br>3、从Hypervisor侧访问安全核中的寄存器等数据，探测是否可以访问。",
-                                    "type": "基础用例",
-                                    "kunpeng": "无测试步骤",
-                                    "notes": "",
-                                    "description": "针对机密计算平台CPU的数据安全性进行测试，验证是否存在有效的隔离机制阻止Hypervisor访问受保护的机密计算平台CPU的数据",
-                                    "package": "2_1"
-                                },
-                                {
-                                    "id": 54,
-                                    "name": "CPU数据隔离安全测试",
-                                    "content": "6.1.1 a)b)",
-                                    "purpose": "验证机密计算平台CPU的数据不被普通环境虚拟机访问",
-                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，使得安全核中的寄存器等存在可信数据；<br>3、创建普通环境虚拟机，并在普通环境虚拟机中访问安全核中的寄存器等数据，探测是否可以访问。",
-                                    "type": "基础用例",
-                                    "kunpeng": "无测试步骤",
-                                    "notes": "",
-                                    "description": "针对机密计算平台CPU的数据安全性进行测试，验证是否存在有效的隔离机制阻止普通环境虚拟机访问受保护的机密计算平台CPU的数据",
-                                    "package": "1_2"
-                                },
-                                {
-                                    "id": 62,
-                                    "name": "CPU数据隔离安全测试",
-                                    "content": "6.1.1 a)b)",
-                                    "purpose": "验证机密计算平台CPU的数据不被普通环境容器访问",
-                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，使得安全核中的寄存器等存在可信数据；<br>3、创建普通环境容器，并在普通环境容器中访问安全核中的寄存器等数据，探测是否可以访问。",
-                                    "type": "基础用例",
-                                    "kunpeng": "无测试步骤",
-                                    "notes": "",
-                                    "description": "针对机密计算平台CPU的数据安全性进行测试，验证是否存在有效的隔离机制阻止普通环境容器访问受保护的机密计算平台CPU的数据",
-                                    "package": "1_2"
-                                },
-                                {
-                                    "id": 38,
-                                    "name": "CPU数据隔离安全测试",
-                                    "content": "6.1.1 a)b)",
-                                    "purpose": "验证机密计算平台CPU的数据不被REE访问",
-                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，使得安全核中的寄存器等存在可信数据；<br>3、从REE侧访问安全核中的寄存器等数据，探测是否可以访问。",
-                                    "type": "基础用例",
-                                    "kunpeng": "无测试步骤",
-                                    "notes": "",
-                                    "description": "针对机密计算平台CPU的数据安全性进行测试，验证是否存在有效的隔离机制阻止REE访问受保护的机密计算平台CPU的数据",
-                                    "package": "1_1"
-                                },
-                                {
-                                    "id": 48,
-                                    "name": "I/O设备（磁盘、加速卡、网卡）数据隔离安全测试",
-                                    "content": "6.1.1 a)b)",
-                                    "purpose": "验证机密计算平台I/O设备的数据不被Hypervisor访问、篡改",
-                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，并在可信程序中进行可信I/O操作；<br>3、从Hypervisor侧访问可信I/O数据，探测是否可以访问、篡改。",
-                                    "type": "基础用例",
-                                    "kunpeng": "无测试步骤",
-                                    "notes": "",
-                                    "description": "针对机密计算平台I/O设备的数据安全性进行测试，验证是否存在有效的隔离机制阻止Hypervisor访问受保护的机密计算平台I/O设备的数据",
-                                    "package": "2_2"
-                                },
-                                {
-                                    "id": 56,
-                                    "name": "I/O设备（磁盘、加速卡、网卡）数据隔离安全测试",
-                                    "content": "6.1.1 a)b)",
-                                    "purpose": "验证机密计算平台I/O设备的数据不被普通环境虚拟机访问、篡改",
-                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，并在可信程序中进行可信I/O操作；<br>3、创建普通环境虚拟机，并在普通环境虚拟机中访问可信I/O数据，探测是否可以访问、篡改。",
-                                    "type": "基础用例",
-                                    "kunpeng": "无测试步骤",
-                                    "notes": "",
-                                    "description": "针对机密计算平台I/O设备的数据安全性进行测试，验证是否存在有效的隔离机制阻止普通环境虚拟机访问受保护的机密计算平台I/O设备的数据",
-                                    "package": "1_1"
-                                },
-                                {
-                                    "id": 64,
-                                    "name": "I/O设备（磁盘、加速卡、网卡）数据隔离安全测试",
-                                    "content": "6.1.1 a)b)",
-                                    "purpose": "验证机密计算平台I/O设备的数据不被普通环境容器访问、篡改",
-                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，并在可信程序中进行可信I/O操作；<br>3、创建普通环境容器，并在普通环境容器中访问可信I/O数据，探测是否可以访问、篡改。",
-                                    "type": "基础用例",
-                                    "kunpeng": "无测试步骤",
-                                    "notes": "",
-                                    "description": "针对机密计算平台I/O设备的数据安全性进行测试，验证是否存在有效的隔离机制阻止普通环境容器访问受保护的机密计算平台I/O设备的数据",
-                                    "package": "1_2"
-                                },
-                                {
-                                    "id": 40,
-                                    "name": "I/O设备（磁盘、加速卡、网卡）数据隔离安全测试",
-                                    "content": "6.1.1 a)b)",
-                                    "purpose": "验证机密计算平台I/O设备的数据不被REE访问、篡改",
-                                    "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，并在可信程序中进行可信I/O操作；<br>3、从REE侧访问可信I/O数据，探测是否可以访问、篡改。",
-                                    "type": "基础用例",
-                                    "kunpeng": "无测试步骤",
-                                    "notes": "",
-                                    "description": "针对机密计算平台I/O设备的数据安全性进行测试，验证是否存在有效的隔离机制阻止REE访问受保护的机密计算平台I/O设备的数据",
-                                    "package": "1_2"
-                                },
-                                {
-                                    "id": "xx",
-                                    "name": "硬件隔离模块逻辑安全性测试",
-                                    "content": "6.1.1 a)b)c)",
-                                    "purpose": "验证机密环境的硬件隔离模块是否存在逻辑安全性问题",
-                                    "steps": "1、启用机密计算平台，开启并初始化硬件隔离模块；<br>2、对硬件隔离模块的功能进行测试；<br>3、检测是否存在逻辑漏洞，若存在漏洞，进行利用。",
-                                    "type": "高阶用例",
-                                    "kunpeng": "无测试步骤",
-                                    "notes": "",
-                                    "description": "验证机密计算环境下硬件隔离模块的逻辑设计否存在潜在缺陷或可利用漏洞，以确保其能有效抵御非预期访问和逻辑层面的攻击，维护机密环境的安全边界。",
-                                    "package": "3_1"
-                                },
-                                {
-                                    "id": "xx",
-                                    "name": "硬件隔离模块渗透攻击安全性测试",
-                                    "content": "6.1.1 a)b)c)",
-                                    "purpose": "验证机密环境下硬件隔离模块是否会受到渗透攻击的威胁",
-                                    "steps": "1、启用机密计算平台，开启并初始化硬件隔离模块；<br>2、适配重构已知渗透攻击（已知漏洞）代码并执行，对硬件隔离模块进行攻击；<br>3、探测攻击者是否能通过渗透攻击窃取机密信息。",
-                                    "type": "高阶用例",
-                                    "kunpeng": "无测试步骤",
-                                    "notes": "",
-                                    "description": "评估机密计算环境下硬件隔离模块的抗渗透能力，验证该模块能否有效抵御恶意渗透行为，保障隔离机制的稳固性",
-                                    "package": "3_2"
-                                },
-                                {
-                                    "id": "xx",
-                                    "name": "硬件隔离模块侧信道攻击安全性测试",
-                                    "content": "6.1.1 a)b)c)",
-                                    "purpose": "验证机密环境下硬件隔离模块是否会受到侧信道攻击的威胁",
-                                    "steps": "1、启用机密计算平台，开启并初始化硬件隔离模块；<br>2、适配重构已知侧信道攻击代码并执行，对硬件隔离模块进行攻击；<br>3、探测攻击者是否能通过侧信道攻击窃取机密信息。",
-                                    "type": "高阶用例",
-                                    "kunpeng": "无测试步骤",
-                                    "notes": "",
-                                    "description": "评估机密计算环境下硬件隔离模块防御侧信道攻击能力，验证该模块能否有效抵御侧信道攻击行为",
-                                    "package": "3_1"
-                                }
-                            ]
+                            "description": "验证硬件隔离模块的安全性能",
+                            "testGroups": {
+                                "硬件资源数据完整性": [
+                                    {
+                                        "id": 71,
+                                        "name": "内存数据完整性测试",
+                                        "content": "6.1.1 a)b)",
+                                        "purpose": "验证机密计算平台内存的数据不被物理攻击者访问",
+                                        "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，使得内存中的安全区部分存在可信数据；<br>3、通过BIOS、故障注入等方式访问或修改内存中的安全区部分数据，探测是否可以访问。",
+                                        "type": "高阶用例",
+                                        "kunpeng": "无测试步骤",
+                                        "notes": "",
+                                        "description": "确保内存数据的完整性，验证机密计算平台内存的数据是否能抵御物理攻击者访问",
+                                        "package": "4_2"
+                                    },
+                                    {
+                                        "id": 70,
+                                        "name": "CPU数据完整性测试",
+                                        "content": "6.1.1 a)b)",
+                                        "purpose": "验证机密计算平台CPU的数据不被物理攻击者访问",
+                                        "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，使得安全核中的寄存器等存在可信数据；<br>3、通过BIOS、故障注入等方式访问或修改安全核中的寄存器等数据，探测是否可以访问。",
+                                        "type": "高阶用例",
+                                        "kunpeng": "无测试步骤",
+                                        "notes": "",
+                                        "description": "确保CPU数据的完整性，验证机密计算平台CPU的数据是否能抵御物理攻击者访问",
+                                        "package": "4_1"
+                                    },
+                                    {
+                                        "id": 72,
+                                        "name": "I/O设备数据完整性测试",
+                                        "content": "6.1.1 a)b)",
+                                        "purpose": "验证机密计算平台I/O设备的数据不被物理攻击者访问",
+                                        "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，并在可信程序中进行可信I/O操作；<br>3、通过BIOS、故障注入等方式访问或修改可信I/O数据，探测是否可以访问。",
+                                        "type": "高阶用例",
+                                        "kunpeng": "无测试步骤",
+                                        "notes": "",
+                                        "description": "确保I/O设备数据的完整性，验证机密计算平台CPU的数据是否能抵御物理攻击者访问",
+                                        "package": "4_2"
+                                    }
+                                ],
+                                "硬件资源机密性": [
+                                    {
+                                        "id": 55,
+                                        "name": "内存数据隔离安全测试",
+                                        "content": "6.1.1 a)b)",
+                                        "purpose": "验证机密计算平台内存的数据不被普通环境虚拟机访问",
+                                        "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，使得内存中的安全区部分存在可信数据；<br>3、创建普通环境虚拟机，并在普通环境虚拟机中访问内存中的安全区部分数据，探测是否可以访问。",
+                                        "type": "基础用例",
+                                        "kunpeng": "已有测试步骤",
+                                        "notes": "",
+                                        "description": "针对机密计算平台内存的数据安全性进行测试，验证是否存在有效的隔离机制阻止普通虚拟机访问受保护的机密计算平台内存的数据",
+                                        "package": "1_2"
+                                    },
+                                    {
+                                        "id": 63,
+                                        "name": "内存数据不被普通环境容器访问测试",
+                                        "content": "6.1.1 a)b)",
+                                        "purpose": "验证机密计算平台内存的数据不被普通环境容器访问",
+                                        "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，使得安全核中的寄存器等存在可信数据；<br>3、创建普通环境容器，并在普通环境容器中访问安全核中的寄存器等数据，探测是否可以访问。",
+                                        "type": "基础用例",
+                                        "kunpeng": "无测试步骤",
+                                        "notes": "",
+                                        "description": "针对机密计算平台内存的数据安全性进行测试，验证是否存在有效的隔离机制阻止普通环境容器访问受保护的机密计算平台内存的数据",
+                                        "package": "1_2"
+                                    },
+                                    {
+                                        "id": 47,
+                                        "name": "内存数据不被Hypervisor访问测试",
+                                        "content": "6.1.1 a)b)",
+                                        "purpose": "验证机密计算平台内存的数据不被Hypervisor访问",
+                                        "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，使得内存中的安全区部分存在可信数据；<br>3、从Hypervisor侧访问内存中的安全区部分数据，探测是否可以访问。",
+                                        "type": "基础用例",
+                                        "kunpeng": "已有测试步骤",
+                                        "notes": "",
+                                        "description": "针对机密计算平台内存的数据安全性进行测试，验证是否存在有效的隔离机制阻止Hypervisor访问受保护的机密计算平台内存的数据",
+                                        "package": "2_1"
+                                    },
+                                    {
+                                        "id": 39,
+                                        "name": "内存数据不被REE访问测试",
+                                        "content": "6.1.1 a)b)",
+                                        "purpose": "验证机密计算平台内存的数据不被REE访问",
+                                        "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，使得内存中的安全区部分存在可信数据；<br>3、从REE侧访问内存中的安全区部分数据，探测是否可以访问。",
+                                        "type": "基础用例",
+                                        "kunpeng": "已有测试步骤",
+                                        "notes": "",
+                                        "description": "针对机密计算平台内存的数据安全性进行测试，验证是否存在有效的隔离机制阻止REE访问受保护的机密计算平台内存的数据",
+                                        "package": "1_1"
+                                    }
+                                ]
+                            }
                         }
                     }
                 },
                 "6.1.2 硬件根密钥": {
+                    "description": "硬件根密钥是在可信硬件（如芯片）中固化的唯一密钥，用于密钥派生等场景。",
                     "requirements": [
-                        "应保证硬件根密钥不被替换或篡改；",
-                        "应保证硬件根密钥禁止被软件直接访问。"
+                        "硬件根密钥是在可信硬件（如芯片）中固化的唯一密钥，用于密钥派生等场景。硬件根密钥满足以下要求：",
+                        "a) 应保证硬件根密钥不被替换或篡改；",
+                        "b) 应保证硬件根密钥禁止被软件直接访问。"
                     ],
-                    "testCases": {}
+                    "testCases": {
+                        "人工检查": {
+                            "description": "通过人工审查方式验证硬件根密钥的安全性",
+                            "testGroups": {
+                                "人工审查": [
+                                    {
+                                        "id": 2,
+                                        "name": "硬件根密钥人工审查",
+                                        "content": "6.1.2 a)b)",
+                                        "purpose": "根密钥保护方案安全",
+                                        "steps": "1、审查厂商提供的根密钥保护方案设计，评估是否安全",
+                                        "type": "基础用例",
+                                        "kunpeng": "已有用例但无具体指标",
+                                        "notes": "",
+                                        "description": "人工审查厂商针对硬件根密钥提供的保护方案设计，评估是否安全",
+                                        "package": "1_1"
+                                    }
+                                ]
+                            }
+                        },
+                        "安全用例": {
+                            "description": "验证硬件根密钥的安全性能",
+                            "testGroups": {
+                                "硬件资源机密性": [
+                                    {
+                                        "id": 5,
+                                        "name": "硬件根密钥安全测试",
+                                        "content": "6.1.2 a)b)",
+                                        "purpose": "根密钥安全",
+                                        "steps": "1、尝试使用非授权代码访问根密钥。<br>2、尝试通过侧信道方式获取根密钥。",
+                                        "type": "高阶用例",
+                                        "kunpeng": "无测试步骤",
+                                        "notes": "",
+                                        "description": "针对根密钥安全性进行测试， 评估是否存在潜在缺陷或可利用漏洞造成根密钥泄露",
+                                        "package": "3_2"
+                                    },
+                                    {
+                                        "id": 74,
+                                        "name": "硬件根密钥不被物理攻击者访问测试",
+                                        "content": "6.1.2 b)",
+                                        "purpose": "验证机密计算平台硬件根密钥不被物理攻击者访问",
+                                        "steps": "1、使能TEE；<br>2、启动机密计算平台；<br>3、在机密计算平台进行信任链认证的时候通过BIOS、故障注入等方式访问或修改硬件根密钥，探测是否可以访问。",
+                                        "type": "高阶用例",
+                                        "kunpeng": "无测试步骤",
+                                        "notes": "",
+                                        "description": "确保硬件根密钥的安全性，验证机密计算平台硬件根密钥是否能抵御物理攻击者访问",
+                                        "package": "4_2"
+                                    },
+                                    {
+                                        "id": 66,
+                                        "name": "硬件根密钥不被普通环境容器访问测试",
+                                        "content": "6.1.2 b)",
+                                        "purpose": "验证机密计算平台硬件根密钥不被普通环境容器访问",
+                                        "steps": "1、使能TEE；<br>2、启动机密计算平台；<br>3、在机密计算平台进行信任链认证的时候创建普通环境容器，并在普通环境容器中访问硬件根密钥，探测是否可以访问。",
+                                        "type": "基础用例",
+                                        "kunpeng": "无测试步骤",
+                                        "notes": "",
+                                        "description": "针对硬件根密钥安全性进行测试，验证是否存在有效的防御机制阻止普通环境容器访问硬件根密钥",
+                                        "package": "1_2"
+                                    }
+                                ]
+                            }
+                        }
+                    }
                 },
                 "6.1.3 硬件密码模块": {
+                    "description": "硬件密码模块用于提供密钥派生、密码运算等功能，包含密码模块引擎与硬件随机数生成器等。",
                     "requirements": [
-                        "随机数生成器质量应满足GB/T 32915-2016的要求；",
-                        "派生出的密钥应保证完整性，非授权用户无法访问；",
-                        "密码算法应采用符合密码相关的国际标准、国家标准、行业标准等要求的密码算法，算法应安全可靠。"
+                        "硬件密码模块用于提供密钥派生、密码运算等功能，包含密码模块引擎与硬件随机数生成器等。硬件密码模块满足以下要求：",
+                        "a) 随机数生成器质量应满足GB/T 32915-2016的要求；",
+                        "b) 派生出的密钥应保证完整性，非授权用户无法访问；",
+                        "c) 密码算法应采用符合密码相关的国际标准、国家标准、行业标准等要求的密码算法，算法应安全可靠。"
                     ],
-                    "testCases": {}
+                    "testCases": {
+                        "人工检查": {
+                            "description": "通过人工审查方式验证硬件密码模块的安全性",
+                            "testGroups": {
+                                "人工审查": [
+                                    {
+                                        "id": 3,
+                                        "name": "硬件密码模块人工审查",
+                                        "content": "6.1.3 b)",
+                                        "purpose": "派生密钥满足机密性与完整性要求",
+                                        "steps": "1、审查厂商提供的密钥派生方案，评估是否安全",
+                                        "type": "基础用例",
+                                        "kunpeng": "已有用例但无具体指标",
+                                        "notes": "",
+                                        "description": "人工审查厂商针对派生密钥是否满足机密性与完整性要求，评估提供的密钥派生方案是否安全",
+                                        "package": "1_1"
+                                    }
+                                ]
+                            }
+                        },
+                        "安全用例": {
+                            "description": "验证硬件密码模块的安全性能",
+                            "testGroups": {
+                                "密码算法安全": [
+                                    {
+                                        "id": 6,
+                                        "name": "随机数生成器安全测试",
+                                        "content": "6.1.3 a)",
+                                        "purpose": "随机数生成质量满足GB/T 32915-2016",
+                                        "steps": "1、采集支持机密计算环境硬件随机数发生器随机数",
+                                        "type": "高阶用例",
+                                        "kunpeng": "无测试步骤",
+                                        "notes": "有国密测评举证",
+                                        "description": "针对随机数生成器安全性进行测试，通过采集支持机密计算环境硬件随机数发生器随机数，评估生成质量是否满足国家安全标准",
+                                        "package": "1_1"
+                                    }
+                                ],
+                                "硬件资源机密性": [
+                                    {
+                                        "id": 75,
+                                        "name": "硬件密码模块密钥不被物理攻击者访问测试",
+                                        "content": "6.1.3 b)",
+                                        "purpose": "验证机密计算平台硬件密码模块密钥不被物理攻击者访问",
+                                        "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，并在可信程序中进行调用硬件密码模块进行加密计算；<br>3、通过BIOS、故障注入等方式访问或修改硬件密码模块密钥，探测是否可以访问。",
+                                        "type": "高阶用例",
+                                        "kunpeng": "无测试步骤",
+                                        "notes": "",
+                                        "description": "确保机密计算平台下硬件密码模块的安全性，验证机密计算平台硬件密码模块是否能抵御物理攻击者恶意访问或篡改数据",
+                                        "package": "4_2"
+                                    },
+                                    {
+                                        "id": 51,
+                                        "name": "硬件密码模块密钥不被Hypervisor访问测试",
+                                        "content": "6.1.3 b)",
+                                        "purpose": "验证机密计算平台硬件密码模块密钥不被Hypervisor访问",
+                                        "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，并在可信程序中进行调用硬件密码模块进行加密计算；<br>3、从Hypervisor侧访问硬件密码模块密钥，探测是否可以访问。",
+                                        "type": "高阶用例",
+                                        "kunpeng": "无测试步骤",
+                                        "notes": "",
+                                        "description": "针对机密计算平台下硬件密码模块安全性进行测试，验证是否存在有效的防御机制阻止Hypervisor访问硬件密码模块密钥",
+                                        "package": "2_2"
+                                    }
+                                ]
+                            }
+                        }
+                    }
                 },
                 "6.1.4 内存加密": {
+                    "description": "内存加密用于保证内存上的数据无法被直接获取。",
                     "requirements": [
-                        "应支持对机密计算环境使用的物理内存进行加密，确保物理内存上数据的机密性；",
-                        "应支持密钥无法被外部环境访问；",
-                        "内存加密算法应采用符合密码相关的国际标准、国家标准、行业标准等要求的密码算法，算法应安全可靠；",
-                        "宜支持对机密计算环境中不同信任域间使用不同密钥加密。"
+                        "内存加密用于保证内存上的数据无法被直接获取。内存加密满足以下要求：",
+                        "a) 应支持对机密计算环境使用的物理内存进行加密，确保物理内存上数据的机密性；",
+                        "b) 应支持密钥无法被外部环境访问；",
+                        "c) 内存加密算法应采用符合密码相关的国际标准、国家标准、行业标准等要求的密码算法，算法应安全可靠；",
+                        "d) 宜支持对机密计算环境中不同信任域间使用不同密钥加密。"
                     ],
-                    "testCases": {}
+                    "testCases": {
+                        "人工检查": {
+                            "description": "通过人工审查方式验证内存加密的安全性",
+                            "testGroups": {
+                                "人工审查": [
+                                    {
+                                        "id": 4,
+                                        "name": "内存加密算法人工审查",
+                                        "content": "6.1.4 b)c)",
+                                        "purpose": "内存加密",
+                                        "steps": "查看内存加密设计文档<br>1、加密算法及密钥长度是否满足要求<br>2、查看文档，确认内存加密算法是否符合要求",
+                                        "type": "基础用例",
+                                        "kunpeng": "已有用例但无具体指标",
+                                        "notes": "",
+                                        "description": "人工审查内存加密算法设计文档，评估内存加密算法设计是否满足要求，确保内存加密的安全性",
+                                        "package": "1_1"
+                                    }
+                                ]
+                            }
+                        },
+                        "功能用例": {
+                            "description": "验证内存加密的功能实现",
+                            "testGroups": {
+                                "加解密功能": [
+                                    {
+                                        "id": 2,
+                                        "name": "内存加密功能测试",
+                                        "content": "6.1.4 a)",
+                                        "purpose": "内存加密功能",
+                                        "steps": "1、开启TEE，进入BIOS的shell命令行<br>2、通过SMC 0x83000400 addr方式来读取一个安全内存地址<br>3、对比TEE开启前后的数据，有结果1",
+                                        "type": "基础用例",
+                                        "kunpeng": "已有测试步骤",
+                                        "notes": "需要特殊版本，发布版本暂无有效测试手段",
+                                        "description": "检查机密计算环境内存加密功能的存在性，验证机密计算平台是否具备内存加密功能",
+                                        "package": "1_1"
+                                    }
+                                ]
+                            }
+                        },
+                        "安全用例": {
+                            "description": "验证内存加密的安全性能",
+                            "testGroups": {
+                                "密码算法安全": [
+                                    {
+                                        "id": 49,
+                                        "name": "内存加密密钥不被Hypervisor访问测试",
+                                        "content": "6.1.4 b)",
+                                        "purpose": "验证机密计算平台内存加密密钥不被Hypervisor访问",
+                                        "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，并在可信程序中进行内存加密操作；<br>3、从Hypervisor侧访问内存加密密钥，探测是否可以访问。",
+                                        "type": "基础用例",
+                                        "kunpeng": "无测试步骤",
+                                        "notes": "",
+                                        "description": "针对机密计算平台下内存加密密钥安全性进行测试，验证是否存在有效的防御机制阻止Hypervisor访问内存加密密钥",
+                                        "package": "2_1"
+                                    },
+                                    {
+                                        "id": 57,
+                                        "name": "内存加密密钥不被普通环境虚机访问测试",
+                                        "content": "6.1.4 b)",
+                                        "purpose": "验证机密计算平台内存加密密钥不被普通环境虚机访问",
+                                        "steps": "1、使能TEE，确定安全核和普通核；<br>2、在安全核上运行可信程序，并在可信程序中进行内存加密操作；<br>3、创建普通环境虚拟机，并在普通环境虚拟机中访问内存加密密钥，探测是否可以访问。",
+                                        "type": "基础用例",
+                                        "kunpeng": "无测试步骤",
+                                        "notes": "",
+                                        "description": "针对机密计算平台下内存加密密钥安全性进行测试，验证是否存在有效的防御机制阻止普通环境虚拟机访问内存加密密钥",
+                                        "package": "1_2"
+                                    }
+                                ]
+                            }
+                        }
+                    }
                 },
                 "6.1.5 硬件信任根": {
+                    "description": "硬件信任根用于支撑机密计算环境启动过程信任链的建立，并用于实现安全启动、远程证明等功能。",
                     "requirements": [
-                        "应保证硬件信任根不被替换或篡改；",
-                        "应具备物理防护机制。"
+                        "硬件信任根用于支撑机密计算环境启动过程信任链的建立，并用于实现安全启动、远程证明等功能，应满足以下要求：",
+                        "a) 应保证硬件信任根不被替换或篡改；",
+                        "b) 应具备物理防护机制。"
                     ],
-                    "testCases": {}
+                    "testCases": {
+                        "人工检查": {
+                            "description": "通过人工审查方式验证硬件信任根的安全性",
+                            "testGroups": {
+                                "人工审查": [
+                                    {
+                                        "id": 5,
+                                        "name": "硬件信任根人工审查",
+                                        "content": "6.1.5 a)",
+                                        "purpose": "硬件信任根安全",
+                                        "steps": "1、审查厂商提供的硬件信任根方案，评估是否安全",
+                                        "type": "基础用例",
+                                        "kunpeng": "已有用例但无具体指标",
+                                        "notes": "",
+                                        "description": "人工审查厂商针对硬件信任根提供的保护方案设计，评估是否安全",
+                                        "package": "1_1"
+                                    }
+                                ]
+                            }
+                        },
+                        "安全用例": {
+                            "description": "验证硬件信任根的安全性能",
+                            "testGroups": {
+                                "硬件资源数据完整性": [
+                                    {
+                                        "id": 9,
+                                        "name": "硬件信任根防篡改安全测试",
+                                        "content": "6.1.5 a）",
+                                        "purpose": "硬件信任根是否可替换",
+                                        "steps": "1、尝试通过厂商提供的工具，是否可以非授权替换硬件信任根<br>2、应尝试篡改硬件可信根，判断硬件可信根是否能成功完成第一级启动代码的校验<br>3、应尝试替换硬件可信根，替换方法包括但不限于物理替换，判断硬件可信根是否能成功完成第一级启动代码的校验",
+                                        "type": "扩展用例",
+                                        "kunpeng": "无测试步骤",
+                                        "notes": "",
+                                        "description": "针对硬件信任根安全性进行测试，验证硬件信任根是否受到非授权访问、恶意篡改、替换的威胁，判断硬件可信根是否能成功完成第一级启动代码的校验",
+                                        "package": "4_1"
+                                    },
+                                    {
+                                        "id": 10,
+                                        "name": "硬件信任根物理安全测试",
+                                        "content": "6.1.5 b）",
+                                        "purpose": "硬件信任根是否具有物理防护机制",
+                                        "steps": "1、尝试通过物理攻击方式，验证是否可以攻破硬件信任根，包含物理攻击、注入等方式",
+                                        "type": "高阶用例",
+                                        "kunpeng": "无测试步骤",
+                                        "notes": "",
+                                        "description": "确保机密计算平台下硬件信任根的安全性，验证机密计算平台硬件信任根是否能抵御物理攻击者攻击",
+                                        "package": "4_2"
+                                    }
+                                ]
+                            }
+                        }
+                    }
                 }
             },
             "系统软件层": {
                 "6.2.1 可信虚拟化": {
+                    "description": "机密计算环境中虚拟化软件为虚拟机提供数据与应用程序保护的能力，提供资源管理和部署支撑，提供通信调度机制。",
                     "requirements": [
-                        "应支持创建多个虚拟机，支持虚拟机生命周期管理；",
-                        "应具备管理虚拟机的CPU、内存、外设等硬件资源能力；",
-                        "应支持虚拟机内存数据及应用不被管理程序篡改；",
-                        "宜支持虚拟机热迁移；",
-                        "虚拟机软硬件资源应具备访问控制能力。"
+                        "机密计算环境中虚拟化软件为虚拟机提供数据与应用程序保护的能力，提供资源管理和部署支撑，提供通信调度机制。机密计算平台支持可信虚拟化时，可信虚拟化满足以下要求：",
+                        "a) 应支持创建多个虚拟机，支持虚拟机生命周期管理；",
+                        "b) 应具备管理虚拟机的CPU、内存、外设等硬件资源能力；",
+                        "c) 应支持虚拟机内存数据及应用不被管理程序篡改；",
+                        "d) 宜支持虚拟机热迁移；",
+                        "e) 虚拟机软硬件资源应具备访问控制能力。"
                     ],
-                    "testCases": {}
+                    "testCases": {
+                        "功能用例": {
+                            "description": "验证可信虚拟化模块的功能实现",
+                            "testGroups": {
+                                "虚拟机功能": [
+                                    {
+                                        "id": 3,
+                                        "name": "虚拟机管理功能测试",
+                                        "content": "6.2.1 a）",
+                                        "purpose": "支持虚拟机管理",
+                                        "steps": "1、执行命令，在机密计算环境创建虚拟机<br>2、执行命令，销毁虚拟机",
+                                        "type": "基础用例",
+                                        "kunpeng": "已有测试步骤",
+                                        "notes": "",
+                                        "description": "检查机密计算平台虚拟机管理功能的存在性，验证机密计算平台是否具备创建、销毁虚拟机等功能",
+                                        "package": "1_1"
+                                    },
+                                    {
+                                        "id": 4,
+                                        "name": "虚拟机硬件资源管理功能测试",
+                                        "content": "6.2.1 b）",
+                                        "purpose": "支持虚拟机的CPU、内存、外设等硬件资源管理",
+                                        "steps": "启动虚拟机，在虚拟中查看CPU、内存、IO等资源信息",
+                                        "type": "基础用例",
+                                        "kunpeng": "已有测试步骤",
+                                        "notes": "",
+                                        "description": "检查机密计算平台虚拟机硬件资源管理功能的存在性，验证机密计算平台是否具备在虚拟机中查看CPU、内存、IO等资源信息等功能",
+                                        "package": "1_1"
+                                    },
+                                    {
+                                        "id": 5,
+                                        "name": "虚拟机热迁移功能测试",
+                                        "content": "6.2.1 d）",
+                                        "purpose": "宜支持虚拟机热迁移",
+                                        "steps": "待补充",
+                                        "type": "基础用例",
+                                        "kunpeng": "无测试步骤",
+                                        "notes": "",
+                                        "description": "检查机密计算平台虚拟机热迁移功能的存在性，验证机密计算平台是否支持虚拟机热迁移功能",
+                                        "package": "1_2"
+                                    }
+                                ]
+                            }
+                        },
+                        "安全用例": {
+                            "description": "验证可信虚拟化模块的安全性能",
+                            "testGroups": {
+                                "虚拟机数据完整性": [
+                                    {
+                                        "id": 77,
+                                        "name": "虚拟机数据完整性安全测试",
+                                        "content": "6.2.1 b)",
+                                        "purpose": "验证机密计算容器的数据不被物理攻击者访问",
+                                        "steps": "1、创建机密计算容器；<br>2、在机密计算容器中运行可信程序，使得机密计算容器的内存存在可信数据；<br>3、通过BIOS、故障注入等方式访问或修改机密计算容器内存中的数据，探测是否可以访问。",
+                                        "type": "高阶用例",
+                                        "kunpeng": "无测试步骤",
+                                        "notes": "",
+                                        "description": "确保机密计算容器的安全性，验证机密计算容器的数据是否能抵御物理攻击者恶意访问或篡改数据",
+                                        "package": "4_1"
+                                    },
+                                    {
+                                        "id": 11,
+                                        "name": "虚拟机内数据及应用不被管理程序篡改测试",
+                                        "content": "6.2.1 c）",
+                                        "purpose": "应支持虚拟机内数据及应用不被管理程序篡改",
+                                        "steps": "使能TEE，创建机密虚机并运行，通过hypervisor获取TEE侧机密虚机内存数据",
+                                        "type": "高阶用例",
+                                        "kunpeng": "已有测试步骤",
+                                        "notes": "可参考测试报告中步骤，需评估已有用例是否可以体现安全性",
+                                        "description": "针对机密计算平台下虚拟机安全性进行测试，验证是否存在有效的防御机制阻止Hypervisor访问TEE侧机密虚拟机内存数据",
+                                        "package": "1_1"
+                                    }
+                                ],
+                                "机密计算容器机密性": [
+                                    {
+                                        "id": 52,
+                                        "name": "虚拟机数据机密性安全测试",
+                                        "content": "6.2.1 c）e)",
+                                        "purpose": "验证机密计算虚拟机的数据不被Hypervisor访问",
+                                        "steps": "1、创建机密计算虚拟机；<br>2、在机密计算虚拟机中运行可信程序，使得机密计算虚拟机的内存存在可信数据；<br>3、从Hypervisor侧访问机密计算虚拟机内存中的数据，探测是否可以访问。",
+                                        "type": "基础用例",
+                                        "kunpeng": "无测试步骤",
+                                        "notes": "",
+                                        "description": "针对机密计算平台下虚拟机数据安全性进行测试，验证是否存在有效的防御机制阻止Hypervisor访问机密计算虚拟机内存存在的可信数据",
+                                        "package": "2_1"
+                                    },
+                                    {
+                                        "id": 44,
+                                        "name": "虚拟机数据不被REE访问测试",
+                                        "content": "6.2.1 c）e)",
+                                        "purpose": "验证机密计算虚拟机的数据不被REE访问",
+                                        "steps": "1、创建机密计算虚拟机；<br>2、在机密计算虚拟机中运行可信程序，使得机密计算虚拟机的内存存在可信数据；<br>3、从REE侧访问机密计算虚拟机内存中的数据，探测是否可以访问。",
+                                        "type": "基础用例",
+                                        "kunpeng": "无测试步骤",
+                                        "notes": "",
+                                        "description": "针对机密计算平台下虚拟机数据安全性进行测试，验证是否存在有效的防御机制阻止REE访问机密计算虚拟机的可信数据",
+                                        "package": "1_2"
+                                    }
+                                ]
+                            }
+                        }
+                    }
                 },
                 "6.2.2 机密计算操作系统": {
+                    "description": "机密计算操作系统利用机密计算可信硬件资源，实现基于硬件隔离的系统执行环境，完成对机密计算环境内资源管理和调度。",
                     "requirements": [
-                        "应提供机密计算环境和普通计算环境的通信机制；",
-                        "应提安全的隔离机制，保证普通计算环境中的应用软件和系统软件在非授权情况下无法访问机密计算环境；",
-                        "宜支持容器化部署；",
-                        "宜经过业界权威测评机构的测评认证。"
+                        "机密计算操作系统利用机密计算可信硬件资源，实现基于硬件隔离的系统执行环境，完成对机密计算环境内资源管理和调度。在机密计算平台支持机密计算操作系统时，机密计算操作系统满足以下要求：",
+                        "a) 应提供机密计算环境和普通计算环境的通信机制；",
+                        "b) 应提安全的隔离机制，保证普通计算环境中的应用软件和系统软件在非授权情况下无法访问机密计算环境；",
+                        "c) 宜支持容器化部署；",
+                        "d) 宜经过业界权威测评机构的测评认证。"
                     ],
-                    "testCases": {}
+                    "testCases": {
+                        "人工检查": {
+                            "description": "通过人工审查方式验证机密计算操作系统的安全性",
+                            "testGroups": {
+                                "人工审查": [
+                                    {
+                                        "id": 6,
+                                        "name": "机密计算操作系统安全人工审查",
+                                        "content": "6.2.2 a）b）",
+                                        "purpose": "机密计算操作系统安全功能",
+                                        "steps": "1、查看操作系统资料，查看操作系统在安全通信，隔离，度量等介绍，评估是否满足安全要求",
+                                        "type": "基础用例",
+                                        "kunpeng": "已有用例但无具体指标",
+                                        "notes": "",
+                                        "description": "人工审查厂商针对机密计算操作系统安全功能的方案设计，评估在安全通信，隔离，度量等方面是否满足安全要求",
+                                        "package": "2_1"
+                                    },
+                                    {
+                                        "id": 7,
+                                        "name": "机密计算操作系统安全性第三方认证",
+                                        "content": "6.2.2 d）",
+                                        "purpose": "机密计算操作系统通过权威测评机构安全认证",
+                                        "steps": "机密计算操作系统送测权威安全测评机构",
+                                        "type": "基础用例",
+                                        "kunpeng": "已有测试步骤",
+                                        "notes": "",
+                                        "description": "机密计算操作系统送测权威安全测评机构进行安全认证",
+                                        "package": "2_1"
+                                    }
+                                ]
+                            }
+                        }
+                    }
                 }
             },
             "系统服务层": {
                 "6.3.1 隔离计算": {
+                    "description": "隔离计算基于硬件的隔离机制和和基于软件的访问控制，区分普通计算环境与机密计算环境。",
                     "requirements": [
-                        "应支持系统软件的隔离性，非机密计算环境的操作系统或其他特权软件在非授权下无法访问该机密计算环境；",
-                        "应确保机密虚拟机之间软硬件资源的隔离性，防止代码及数据的泄露；",
-                        "应支持机密计算应用程序的隔离性，不能越权访问其他机密计算应用程序。"
+                        "隔离计算基于硬件的隔离机制和和基于软件的访问控制，区分普通计算环境与机密计算环境。提供计算计算应用程序的管理和调用功能。隔离计算应满足以下要求：",
+                        "a) 应支持系统软件的隔离性，非机密计算环境的操作系统或其他特权软件在非授权下无法访问该机密计算环境；",
+                        "b) 应确保机密虚拟机之间软硬件资源的隔离性，防止代码及数据的泄露；",
+                        "c) 应支持机密计算应用程序的隔离性，不能越权访问其他机密计算应用程序。"
                     ],
-                    "testCases": {}
+                    "testCases": {
+                        "安全用例": {
+                            "description": "验证隔离计算的安全性能",
+                            "testGroups": {
+                                "虚拟机机密性": [
+                                    {
+                                        "id": 13,
+                                        "name": "虚拟机与机密虚拟机明文隔离性安全测试",
+                                        "content": "6.3.1 a）",
+                                        "purpose": "测试VM与CVM间无法访问明文数据",
+                                        "steps": "1、在普通虚机中产生一些机密信息<br>2、L2 Qemu中抓取内存<br>3、dump内存，有结果1。<br>4、在机密虚机中产生一些机密信息<br>5、L2 Qemu中抓取内存。<br>6、dump中内存，有结果2。",
+                                        "type": "基础用例",
+                                        "kunpeng": "已有测试步骤",
+                                        "notes": "已有测试步骤，但还需评估当前步骤是否已证明安全可靠",
+                                        "description": "针对虚拟机与机密虚拟机明文隔离性进行安全测试，验证VM与CVM间明文具有严格的隔离性，无法访问到明文数据",
+                                        "package": "1_1"
+                                    },
+                                    {
+                                        "id": 14,
+                                        "name": "虚拟机与机密虚拟机数据隔离性安全测试",
+                                        "content": "6.3.1 a）",
+                                        "purpose": "测试VM与CVM间无法访问数据",
+                                        "steps": "1、在普通虚机中产生一些机密信息<br>2、L2 Qemu中抓取内存<br>3、dump内存，有结果1。<br>4、在机密虚机中产生一些机密信息<br>5、L2 Qemu中抓取内存。<br>6、dump中内存，有结果2。",
+                                        "type": "基础用例",
+                                        "kunpeng": "已有测试步骤",
+                                        "notes": "已有测试步骤，但还需评估当前步骤是否已证明安全可靠",
+                                        "description": "针对虚拟机与机密虚拟机数据隔离性进行安全测试，验证VM与CVM间数据具有严格的隔离性，无法访问到数据",
+                                        "package": "1_1"
+                                    }
+                                ]
+                            }
+                        }
+                    }
                 },
                 "6.3.2 安全启动": {
+                    "description": "安全启动保证了机密计算环境按照既定逻辑启动，通过公钥证书逐级验证待启动的固件或软件的签名，确保固件或软件不被篡改。",
                     "requirements": [
-                        "应支持基于硬件信任根，通过签名验签方法验证机密计算环境启动过程的每一个阶段，以确保机密计算应用程序按照预期行为执行计算任务；非法组件或签名应能被检测出，验证不通过应停止启动流程。",
-                        "应保证安全启动信任链按序逐级验证，不可被恶意绕过。"
+                        "安全启动保证了机密计算环境按照既定逻辑启动，通过公钥证书逐级验证待启动的固件或软件的签名，确保固件或软件不被篡改。安全启动满足以下要求：",
+                        "a) 应支持基于硬件信任根，通过签名验签方法验证机密计算环境启动过程的每一个阶段，以确保机密计算应用程序按照预期行为执行计算任务；非法组件或签名应能被检测出，验证不通过应停止启动流程。<br>b) 应保证安全启动信任链按序逐级验证，不可被恶意绕过。"
                     ],
-                    "testCases": {}
-                },
-                "6.3.3 可信度量": {
-                    "requirements": [
-                        "应基于硬件信任根建立机密计算环境启动过程中的信任链，对关键固件、操作系统或软件生成度量值；",
-                        "宜支持动态度量，包括但不限于应用程序代码段，动态库代码段，内核代码段等。"
-                    ],
-                    "testCases": {}
-                },
-                "6.3.4 远程证明": {
-                    "requirements": [
-                        "应支持挑战/应答机制，抵抗证明报告的重放攻击；",
-                        "应支持生成机密计算环境的证明报告；",
-                        "应支持生成机密计算应用程序启动时的证明报告；",
-                        "应基于硬件信任根对证明报告签名，保证证明报告的完整性和真实性；",
-                        "宜支持对机密虚拟机、容器内运行的应用程序进行动态度量，保障完整性和真实性验证。"
-                    ],
-                    "testCases": {}
-                },
-                "6.3.5 安全存储": {
-                    "requirements": [
-                        "应支持机密计算环境中的数据保存到外部存储介质中时加密存储，外部存储的加密数据加载到机密计算环境时可正确解密；",
-                        "应保证加密的数据解密后只能被授权实体访问；",
-                        "应保证安全存储所使用密钥的机密性和完整性。"
-                    ],
-                    "testCases": {}
-                },
-                "6.3.6 密码运算": {
-                    "requirements": [
-                        "应支持在机密计算环境执行基础的密码运算，包括加密、解密、签名、验签、杂凑等操作；",
-                        "密码算法应采用符合密码相关的国际标准、国家标准、行业标准等要求的密码算法，算法应安全可靠。"
-                    ],
-                    "testCases": {}
-                },
-                "6.3.7 密钥管理": {
-                    "requirements": [
-                        "应使用安全的方式派生密钥，密钥（除公钥外）应以密文形式存储或备份或归档在可信的介质中，且无法被非授权访问、使用、修改和替换；",
-                        "密钥分发过程中应采取身份认证等方式保障分发者/接收者身份的真实性，且保障密钥的机密性和完整性；",
-                        "应确保对称密钥与非对称私钥只能在机密计算环境内部（包含TEE与硬件密钥模块内）使用。",
-                        "密钥在生命周期结束、发生泄漏或有泄漏风险时应支持密钥销毁。",
-                        "密钥仅能在机密计算环境中使用，且不支持明文导出，支持密钥迁移。"
-                    ],
-                    "testCases": {}
-                },
-                "6.3.8 异构设备互联": {
-                    "requirements": [
-                        "机密计算环境与I/O设备的通信应支持访问控制机制或加密机制，确保数据的通信安全；",
-                        "应保证异构机密计算的性能损耗符合业务要求，评价方法可参考附录B。"
-                    ],
-                    "testCases": {}
-                },
-                "6.3.9 数据封装": {
-                    "requirements": [
-                        "封装密钥应保证机密性与完整性；",
-                        "封装密钥应基于硬件根密钥派生；",
-                        "封装的数据应只能被授权的硬件或服务访问，数据解封只能在数据封装的环境。"
-                    ],
-                    "testCases": {}
-                },
-                "6.3.10 安全信道": {
-                    "requirements": [
-                        "应保证安全信道中的数据不被非授权访问与篡改，建立信道双方应进行身份认证。"
-                    ],
-                    "testCases": {}
-                },
-                "6.3.11 密码硬件加速": {
-                    "requirements": [
-                        "机密计算环境宜提供密码硬件加速功能，提升密码运算效率；",
-                        "密码算法应采用符合密码相关的国际标准、国家标准、行业标准等要求的密码算法，算法应安全可靠。"
-                    ],
-                    "testCases": {}
+                    "testCases": {
+                        "人工检查": {
+                            "description": "通过人工审查方式验证安全启动的安全性",
+                            "testGroups": {
+                                "人工审查": [
+                                    {
+                                        "id": 8,
+                                        "name": "安全启动人工审查",
+                                        "content": "6.3.2 a）",
+                                        "purpose": "产品提供安全启动资料",
+                                        "steps": "1、应检视厂商提供材料的安全启动机制的安全强度达到标准要求",
+                                        "type": "基础用例",
+                                        "kunpeng": "已有用例但无具体指标",
+                                        "notes": "",
+                                        "description": "人工审查厂商针对安全启动机制的方案设计，评估是否达到安全强度，满足安全要求",
+                                        "package": "1_1"
+                                    }
+                                ]
+                            }
+                        },
+                        "功能用例": {
+                            "description": "验证安全启动的功能实现",
+                            "testGroups": {
+                                "安全启动功能": [
+                                    {
+                                        "id": 7,
+                                        "name": "安全启动过程功能测试",
+                                        "content": "6.3.2 a）",
+                                        "purpose": "产品提供安全启动资料",
+                                        "steps": "1、检测安全启动过程日志，检验是按序依次校验。",
+                                        "type": "基础用例",
+                                        "kunpeng": "已有测试步骤",
+                                        "notes": "",
+                                        "description": "根据厂商提供的安全启动资料实现安全启动，按序依次检验安全启动过程的日志，评估是否具有安全启动的功能",
+                                        "package": "1_1"
+                                    }
+                                ]
+                            }
+                        }
+                    }
                 }
             }
+        };
+
+        // 当前页面状态
+        let currentPage = {
+            type: "home", // home, techLevel, module, testType, testGroup
+            techLevel: null,
+            module: null,
+            testType: null,
+            testGroup: null
         };
 
         // 生成导航菜单
@@ -867,6 +1293,10 @@
                 const techLevelLink = document.createElement('a');
                 techLevelLink.href = `#${techLevelId}`;
                 techLevelLink.innerHTML = `<i class="fas fa-layer-group"></i> ${techLevel}`;
+                techLevelLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    loadTechLevelPage(techLevel);
+                });
                 
                 techLevelItem.appendChild(techLevelLink);
                 
@@ -881,6 +1311,10 @@
                     const moduleLink = document.createElement('a');
                     moduleLink.href = `#${moduleId}`;
                     moduleLink.innerHTML = `<i class="fas fa-microchip"></i> ${moduleName}`;
+                    moduleLink.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        loadModulePage(techLevel, moduleName);
+                    });
                     
                     moduleItem.appendChild(moduleLink);
                     
@@ -889,7 +1323,7 @@
                         const testTypesSubmenu = document.createElement('ul');
                         testTypesSubmenu.className = 'submenu';
                         
-                        for (const [testType, testGroups] of Object.entries(moduleData.testCases)) {
+                        for (const [testType, testTypeData] of Object.entries(moduleData.testCases)) {
                             const testTypeId = `${moduleId}-${testType.replace(/\s+/g, '-')}`;
                             const testTypeItem = document.createElement('li');
                             testTypeItem.className = 'nav-item';
@@ -897,15 +1331,19 @@
                             const testTypeLink = document.createElement('a');
                             testTypeLink.href = `#${testTypeId}`;
                             testTypeLink.innerHTML = `<i class="fas fa-cubes"></i> ${testType}`;
+                            testTypeLink.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                loadTestTypePage(techLevel, moduleName, testType);
+                            });
                             
                             testTypeItem.appendChild(testTypeLink);
                             
                             // 如果有测试组，添加子菜单
-                            if (Object.keys(testGroups).length > 0) {
+                            if (Object.keys(testTypeData.testGroups).length > 0) {
                                 const testGroupsSubmenu = document.createElement('ul');
                                 testGroupsSubmenu.className = 'submenu';
                                 
-                                for (const [testGroup, testCases] of Object.entries(testGroups)) {
+                                for (const [testGroup, testCases] of Object.entries(testTypeData.testGroups)) {
                                     const testGroupId = `${testTypeId}-${testGroup.replace(/\s+/g, '-')}`;
                                     const testGroupItem = document.createElement('li');
                                     testGroupItem.className = 'nav-item';
@@ -913,6 +1351,10 @@
                                     const testGroupLink = document.createElement('a');
                                     testGroupLink.href = `#${testGroupId}`;
                                     testGroupLink.innerHTML = `<i class="fas fa-layer-group"></i> ${testGroup}`;
+                                    testGroupLink.addEventListener('click', (e) => {
+                                        e.preventDefault();
+                                        loadTestGroupPage(techLevel, moduleName, testType, testGroup);
+                                    });
                                     
                                     testGroupItem.appendChild(testGroupLink);
                                     testGroupsSubmenu.appendChild(testGroupItem);
@@ -935,130 +1377,405 @@
             }
         }
 
-        // 生成内容区域
-        function generateContent() {
+        // 加载首页
+        function loadHomePage() {
+            currentPage = {
+                type: "home",
+                techLevel: null,
+                module: null,
+                testType: null,
+                testGroup: null
+            };
+            
+            document.getElementById('pageTitle').textContent = "机密计算测试用例库";
+            document.getElementById('pageDescription').textContent = "按照技术层面→硬件模块→技术要求→测试用例类型的层级结构展示";
+            document.getElementById('backButton').style.display = 'none';
+            updateBreadcrumb();
+            
             const contentArea = document.getElementById('contentArea');
             contentArea.innerHTML = '';
             
+            // 创建技术层面概览
+            const overviewSection = document.createElement('div');
+            overviewSection.className = 'section';
+            
+            const overviewHeader = document.createElement('div');
+            overviewHeader.className = 'section-header';
+            overviewHeader.innerHTML = '<h2 class="section-title">技术层面概览</h2>';
+            overviewSection.appendChild(overviewHeader);
+            
+            const subdirectory = document.createElement('div');
+            subdirectory.className = 'subdirectory';
+            
             for (const [techLevel, modules] of Object.entries(testCasesData)) {
-                const techLevelId = techLevel.replace(/\s+/g, '-');
-                const techLevelSection = document.createElement('section');
-                techLevelSection.className = 'section';
-                techLevelSection.id = techLevelId;
+                const techLevelItem = document.createElement('div');
+                techLevelItem.className = 'subdirectory-item';
+                techLevelItem.addEventListener('click', () => {
+                    loadTechLevelPage(techLevel);
+                });
                 
-                const techLevelHeader = document.createElement('div');
-                techLevelHeader.className = 'section-header';
-                techLevelHeader.innerHTML = `<h2 class="section-title">${techLevel}</h2>`;
+                techLevelItem.innerHTML = `
+                    <h3>${techLevel}</h3>
+                    <p>包含 ${Object.keys(modules).length} 个硬件模块</p>
+                `;
                 
-                techLevelSection.appendChild(techLevelHeader);
+                subdirectory.appendChild(techLevelItem);
+            }
+            
+            overviewSection.appendChild(subdirectory);
+            contentArea.appendChild(overviewSection);
+        }
+
+        // 加载技术层面页面
+        function loadTechLevelPage(techLevel) {
+            currentPage = {
+                type: "techLevel",
+                techLevel: techLevel,
+                module: null,
+                testType: null,
+                testGroup: null
+            };
+            
+            document.getElementById('pageTitle').textContent = techLevel;
+            document.getElementById('pageDescription').textContent = "硬件模块列表";
+            document.getElementById('backButton').style.display = 'block';
+            updateBreadcrumb();
+            
+            const contentArea = document.getElementById('contentArea');
+            contentArea.innerHTML = '';
+            
+            const modules = testCasesData[techLevel];
+            
+            // 创建模块概览
+            const overviewSection = document.createElement('div');
+            overviewSection.className = 'section';
+            
+            const overviewHeader = document.createElement('div');
+            overviewHeader.className = 'section-header';
+            overviewHeader.innerHTML = `<h2 class="section-title">${techLevel} - 硬件模块</h2>`;
+            overviewSection.appendChild(overviewHeader);
+            
+            const subdirectory = document.createElement('div');
+            subdirectory.className = 'subdirectory';
+            
+            for (const [moduleName, moduleData] of Object.entries(modules)) {
+                const moduleItem = document.createElement('div');
+                moduleItem.className = 'subdirectory-item';
+                moduleItem.addEventListener('click', () => {
+                    loadModulePage(techLevel, moduleName);
+                });
                 
-                for (const [moduleName, moduleData] of Object.entries(modules)) {
-                    const moduleId = `${techLevelId}-${moduleName.replace(/\s+/g, '-')}`;
-                    
-                    const moduleSubtitle = document.createElement('h3');
-                    moduleSubtitle.className = 'section-subtitle';
-                    moduleSubtitle.id = moduleId;
-                    moduleSubtitle.textContent = moduleName;
-                    
-                    techLevelSection.appendChild(moduleSubtitle);
-                    
-                    // 技术要求
-                    if (moduleData.requirements && moduleData.requirements.length > 0) {
-                        const requirementsTitle = document.createElement('h4');
-                        requirementsTitle.textContent = '技术要求：';
-                        requirementsTitle.style.margin = '15px 0 10px';
-                        
-                        techLevelSection.appendChild(requirementsTitle);
-                        
-                        const requirementsList = document.createElement('ol');
-                        requirementsList.className = 'requirements-list';
-                        
-                        moduleData.requirements.forEach(req => {
-                            const reqItem = document.createElement('li');
-                            reqItem.innerHTML = req;
-                            requirementsList.appendChild(reqItem);
-                        });
-                        
-                        techLevelSection.appendChild(requirementsList);
-                    }
-                    
-                    // 测试用例
-                    if (moduleData.testCases && Object.keys(moduleData.testCases).length > 0) {
-                        for (const [testType, testGroups] of Object.entries(moduleData.testCases)) {
-                            const testTypeId = `${moduleId}-${testType.replace(/\s+/g, '-')}`;
-                            const testTypeTitle = document.createElement('h4');
-                            testTypeTitle.className = 'section-subtitle-2';
-                            testTypeTitle.id = testTypeId;
-                            testTypeTitle.textContent = `测试用例类型：${testType}`;
-                            
-                            techLevelSection.appendChild(testTypeTitle);
-                            
-                            for (const [testGroup, testCases] of Object.entries(testGroups)) {
-                                if (testCases.length > 0) {
-                                    const testGroupId = `${testTypeId}-${testGroup.replace(/\s+/g, '-')}`;
-                                    const testGroupTitle = document.createElement('h5');
-                                    testGroupTitle.className = 'section-subtitle-2';
-                                    testGroupTitle.id = testGroupId;
-                                    testGroupTitle.textContent = `测试用例组：${testGroup}`;
-                                    
-                                    techLevelSection.appendChild(testGroupTitle);
-                                    
-                                    testCases.forEach(testCase => {
-                                        const testCaseCard = document.createElement('div');
-                                        testCaseCard.className = 'test-case-card';
-                                        
-                                        const testCaseHeader = document.createElement('div');
-                                        testCaseHeader.className = 'test-case-header';
-                                        
-                                        const testCaseTitle = document.createElement('h5');
-                                        testCaseTitle.className = 'test-case-title';
-                                        testCaseTitle.textContent = testCase.name;
-                                        
-                                        const testCaseId = document.createElement('span');
-                                        testCaseId.className = 'test-case-id';
-                                        testCaseId.textContent = `ID: ${testCase.id}`;
-                                        
-                                        testCaseHeader.appendChild(testCaseTitle);
-                                        testCaseHeader.appendChild(testCaseId);
-                                        
-                                        const testCaseContent = document.createElement('div');
-                                        testCaseContent.className = 'test-case-content';
-                                        
-                                        testCaseContent.innerHTML = `
-                                            <p><strong>对应内容：</strong>${testCase.content}</p>
-                                            <p><strong>测试目的：</strong>${testCase.purpose}</p>
-                                            <p><strong>测试步骤及输入数据：</strong><br>${testCase.steps}</p>
-                                            <p><strong>测试用例类型：</strong><span class="test-case-type-badge ${getTypeClass(testCase.type)}">${testCase.type}</span></p>
-                                            <p><strong>是否已有鲲鹏测试步骤：</strong><span class="kunpeng-status ${testCase.kunpeng.includes('已有') ? 'has-steps' : 'no-steps'}">${testCase.kunpeng}</span></p>
-                                            ${testCase.notes ? `<p><strong>备注：</strong>${testCase.notes}</p>` : ''}
-                                            <p><strong>测试用例描述：</strong>${testCase.description}</p>
-                                        `;
-                                        
-                                        const testCaseFooter = document.createElement('div');
-                                        testCaseFooter.className = 'test-case-footer';
-                                        testCaseFooter.innerHTML = `
-                                            <span>测试用例包: ${testCase.package}</span>
-                                        `;
-                                        
-                                        testCaseCard.appendChild(testCaseHeader);
-                                        testCaseCard.appendChild(testCaseContent);
-                                        testCaseCard.appendChild(testCaseFooter);
-                                        
-                                        techLevelSection.appendChild(testCaseCard);
-                                    });
-                                }
-                            }
-                        }
-                    } else {
-                        const noTestCasesMsg = document.createElement('div');
-                        noTestCasesMsg.className = 'empty-data';
-                        noTestCasesMsg.textContent = '暂无测试用例，后续可补充。';
-                        
-                        techLevelSection.appendChild(noTestCasesMsg);
-                    }
-                }
+                moduleItem.innerHTML = `
+                    <h3>${moduleName}</h3>
+                    <p>${moduleData.description}</p>
+                `;
                 
-                contentArea.appendChild(techLevelSection);
+                subdirectory.appendChild(moduleItem);
+            }
+            
+            overviewSection.appendChild(subdirectory);
+            contentArea.appendChild(overviewSection);
+        }
+
+        // 加载模块页面
+        function loadModulePage(techLevel, moduleName) {
+            currentPage = {
+                type: "module",
+                techLevel: techLevel,
+                module: moduleName,
+                testType: null,
+                testGroup: null
+            };
+            
+            document.getElementById('pageTitle').textContent = moduleName;
+            document.getElementById('pageDescription').textContent = "测试用例类型";
+            document.getElementById('backButton').style.display = 'block';
+            updateBreadcrumb();
+            
+            const contentArea = document.getElementById('contentArea');
+            contentArea.innerHTML = '';
+            
+            const moduleData = testCasesData[techLevel][moduleName];
+            
+            // 模块介绍
+            const introSection = document.createElement('div');
+            introSection.className = 'section';
+            
+            const introHeader = document.createElement('div');
+            introHeader.className = 'section-header';
+            introHeader.innerHTML = `<h2 class="section-title">${moduleName} - 模块介绍</h2>`;
+            introSection.appendChild(introHeader);
+            
+            const introContent = document.createElement('div');
+            introContent.className = 'module-overview';
+            introContent.innerHTML = `
+                <p>${moduleData.description}</p>
+                <h3 class="section-subtitle">技术要求</h3>
+                <ol class="requirements-list">
+                    ${moduleData.requirements.map(req => `<li>${req}</li>`).join('')}
+                </ol>
+            `;
+            introSection.appendChild(introContent);
+            contentArea.appendChild(introSection);
+            
+            // 测试用例类型
+            const testTypesSection = document.createElement('div');
+            testTypesSection.className = 'section';
+            
+            const testTypesHeader = document.createElement('div');
+            testTypesHeader.className = 'section-header';
+            testTypesHeader.innerHTML = `<h2 class="section-title">测试用例类型</h2>`;
+            testTypesSection.appendChild(testTypesHeader);
+            
+            const subdirectory = document.createElement('div');
+            subdirectory.className = 'subdirectory';
+            
+            for (const [testType, testTypeData] of Object.entries(moduleData.testCases)) {
+                const testTypeItem = document.createElement('div');
+                testTypeItem.className = 'subdirectory-item';
+                testTypeItem.addEventListener('click', () => {
+                    loadTestTypePage(techLevel, moduleName, testType);
+                });
+                
+                testTypeItem.innerHTML = `
+                    <h3>${testType}</h3>
+                    <p>${testTypeData.description}</p>
+                `;
+                
+                subdirectory.appendChild(testTypeItem);
+            }
+            
+            testTypesSection.appendChild(subdirectory);
+            contentArea.appendChild(testTypesSection);
+        }
+
+        // 加载测试用例类型页面
+        function loadTestTypePage(techLevel, moduleName, testType) {
+            currentPage = {
+                type: "testType",
+                techLevel: techLevel,
+                module: moduleName,
+                testType: testType,
+                testGroup: null
+            };
+            
+            document.getElementById('pageTitle').textContent = `${moduleName} - ${testType}`;
+            document.getElementById('pageDescription').textContent = "测试用例组";
+            document.getElementById('backButton').style.display = 'block';
+            updateBreadcrumb();
+            
+            const contentArea = document.getElementById('contentArea');
+            contentArea.innerHTML = '';
+            
+            const testTypeData = testCasesData[techLevel][moduleName].testCases[testType];
+            
+            // 测试用例类型介绍
+            const introSection = document.createElement('div');
+            introSection.className = 'section';
+            
+            const introHeader = document.createElement('div');
+            introHeader.className = 'section-header';
+            introHeader.innerHTML = `<h2 class="section-title">${testType} - 介绍</h2>`;
+            introSection.appendChild(introHeader);
+            
+            const introContent = document.createElement('div');
+            introContent.className = 'module-overview';
+            introContent.innerHTML = `
+                <p>${testTypeData.description}</p>
+            `;
+            introSection.appendChild(introContent);
+            contentArea.appendChild(introSection);
+            
+            // 测试用例组
+            const testGroupsSection = document.createElement('div');
+            testGroupsSection.className = 'section';
+            
+            const testGroupsHeader = document.createElement('div');
+            testGroupsHeader.className = 'section-header';
+            testGroupsHeader.innerHTML = `<h2 class="section-title">测试用例组</h2>`;
+            testGroupsSection.appendChild(testGroupsHeader);
+            
+            const subdirectory = document.createElement('div');
+            subdirectory.className = 'subdirectory';
+            
+            for (const [testGroup, testCases] of Object.entries(testTypeData.testGroups)) {
+                const testGroupItem = document.createElement('div');
+                testGroupItem.className = 'subdirectory-item';
+                testGroupItem.addEventListener('click', () => {
+                    loadTestGroupPage(techLevel, moduleName, testType, testGroup);
+                });
+                
+                testGroupItem.innerHTML = `
+                    <h3>${testGroup}</h3>
+                    <p>包含 ${testCases.length} 个测试用例</p>
+                `;
+                
+                subdirectory.appendChild(testGroupItem);
+            }
+            
+            testGroupsSection.appendChild(subdirectory);
+            contentArea.appendChild(testGroupsSection);
+        }
+
+        // 加载测试用例组页面
+        function loadTestGroupPage(techLevel, moduleName, testType, testGroup) {
+            currentPage = {
+                type: "testGroup",
+                techLevel: techLevel,
+                module: moduleName,
+                testType: testType,
+                testGroup: testGroup
+            };
+            
+            document.getElementById('pageTitle').textContent = `${moduleName} - ${testType} - ${testGroup}`;
+            document.getElementById('pageDescription').textContent = "测试用例详情";
+            document.getElementById('backButton').style.display = 'block';
+            updateBreadcrumb();
+            
+            const contentArea = document.getElementById('contentArea');
+            contentArea.innerHTML = '';
+            
+            const testCases = testCasesData[techLevel][moduleName].testCases[testType].testGroups[testGroup];
+            
+            // 测试用例列表
+            const testCasesSection = document.createElement('div');
+            testCasesSection.className = 'section';
+            
+            const testCasesHeader = document.createElement('div');
+            testCasesHeader.className = 'section-header';
+            testCasesHeader.innerHTML = `<h2 class="section-title">${testGroup} - 测试用例</h2>`;
+            testCasesSection.appendChild(testCasesHeader);
+            
+            if (testCases.length === 0) {
+                const noTestCasesMsg = document.createElement('div');
+                noTestCasesMsg.className = 'empty-data';
+                noTestCasesMsg.textContent = '暂无测试用例，后续可补充。';
+                testCasesSection.appendChild(noTestCasesMsg);
+            } else {
+                testCases.forEach(testCase => {
+                    const testCaseCard = document.createElement('div');
+                    testCaseCard.className = 'test-case-card';
+                    
+                    const testCaseHeader = document.createElement('div');
+                    testCaseHeader.className = 'test-case-header';
+                    
+                    const testCaseTitle = document.createElement('h5');
+                    testCaseTitle.className = 'test-case-title';
+                    testCaseTitle.textContent = testCase.name;
+                    
+                    const testCaseId = document.createElement('span');
+                    testCaseId.className = 'test-case-id';
+                    testCaseId.textContent = `ID: ${testCase.id}`;
+                    
+                    testCaseHeader.appendChild(testCaseTitle);
+                    testCaseHeader.appendChild(testCaseId);
+                    
+                    const testCaseContent = document.createElement('div');
+                    testCaseContent.className = 'test-case-content';
+                    
+                    testCaseContent.innerHTML = `
+                        <p><strong>对应内容：</strong>${testCase.content}</p>
+                        <p><strong>测试目的：</strong>${testCase.purpose}</p>
+                        <p><strong>测试步骤及输入数据：</strong><br>${testCase.steps}</p>
+                        <p><strong>测试用例类型：</strong><span class="test-case-type-badge ${getTypeClass(testCase.type)}">${testCase.type}</span></p>
+                        <p><strong>是否已有鲲鹏测试步骤：</strong><span class="kunpeng-status ${testCase.kunpeng.includes('已有') ? 'has-steps' : 'no-steps'}">${testCase.kunpeng}</span></p>
+                        ${testCase.notes ? `<p><strong>备注：</strong>${testCase.notes}</p>` : ''}
+                        <p><strong>测试用例描述：</strong>${testCase.description}</p>
+                    `;
+                    
+                    const testCaseFooter = document.createElement('div');
+                    testCaseFooter.className = 'test-case-footer';
+                    testCaseFooter.innerHTML = `
+                        <span>测试用例包: ${testCase.package}</span>
+                    `;
+                    
+                    testCaseCard.appendChild(testCaseHeader);
+                    testCaseCard.appendChild(testCaseContent);
+                    testCaseCard.appendChild(testCaseFooter);
+                    
+                    testCasesSection.appendChild(testCaseCard);
+                });
+            }
+            
+            contentArea.appendChild(testCasesSection);
+        }
+
+        // 更新面包屑导航
+        function updateBreadcrumb() {
+            const breadcrumb = document.getElementById('breadcrumb');
+            breadcrumb.innerHTML = '';
+            
+            // 首页链接
+            const homeLink = document.createElement('a');
+            homeLink.href = '#';
+            homeLink.textContent = '首页';
+            homeLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                loadHomePage();
+            });
+            breadcrumb.appendChild(homeLink);
+            
+            // 技术层面链接
+            if (currentPage.techLevel) {
+                const separator1 = document.createElement('span');
+                separator1.className = 'breadcrumb-separator';
+                separator1.textContent = '>';
+                breadcrumb.appendChild(separator1);
+                
+                const techLevelLink = document.createElement('a');
+                techLevelLink.href = '#';
+                techLevelLink.textContent = currentPage.techLevel;
+                techLevelLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    loadTechLevelPage(currentPage.techLevel);
+                });
+                breadcrumb.appendChild(techLevelLink);
+            }
+            
+            // 模块链接
+            if (currentPage.module) {
+                const separator2 = document.createElement('span');
+                separator2.className = 'breadcrumb-separator';
+                separator2.textContent = '>';
+                breadcrumb.appendChild(separator2);
+                
+                const moduleLink = document.createElement('a');
+                moduleLink.href = '#';
+                moduleLink.textContent = currentPage.module;
+                moduleLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    loadModulePage(currentPage.techLevel, currentPage.module);
+                });
+                breadcrumb.appendChild(moduleLink);
+            }
+            
+            // 测试用例类型链接
+            if (currentPage.testType) {
+                const separator3 = document.createElement('span');
+                separator3.className = 'breadcrumb-separator';
+                separator3.textContent = '>';
+                breadcrumb.appendChild(separator3);
+                
+                const testTypeLink = document.createElement('a');
+                testTypeLink.href = '#';
+                testTypeLink.textContent = currentPage.testType;
+                testTypeLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    loadTestTypePage(currentPage.techLevel, currentPage.module, currentPage.testType);
+                });
+                breadcrumb.appendChild(testTypeLink);
+            }
+            
+            // 测试用例组链接
+            if (currentPage.testGroup) {
+                const separator4 = document.createElement('span');
+                separator4.className = 'breadcrumb-separator';
+                separator4.textContent = '>';
+                breadcrumb.appendChild(separator4);
+                
+                const testGroupLink = document.createElement('span');
+                testGroupLink.textContent = currentPage.testGroup;
+                breadcrumb.appendChild(testGroupLink);
             }
         }
 
@@ -1072,15 +1789,160 @@
             }
         }
 
-        // 平滑滚动到锚点
-        function scrollToAnchor(anchorId) {
-            const element = document.getElementById(anchorId);
-            if (element) {
-                window.scrollTo({
-                    top: element.offsetTop - 20,
-                    behavior: 'smooth'
-                });
+        // 搜索功能
+        function performSearch(searchTerm) {
+            const searchResults = [];
+            
+            if (!searchTerm) {
+                document.getElementById('searchResults').classList.add('hidden');
+                loadHomePage();
+                return;
             }
+            
+            // 在所有技术层面中搜索
+            Object.keys(testCasesData).forEach(techLevel => {
+                const modules = testCasesData[techLevel];
+                
+                for (const [moduleName, moduleData] of Object.entries(modules)) {
+                    // 搜索技术要求
+                    if (moduleData.requirements) {
+                        moduleData.requirements.forEach(req => {
+                            if (req.toLowerCase().includes(searchTerm)) {
+                                searchResults.push({
+                                    type: 'requirement',
+                                    techLevel,
+                                    moduleName,
+                                    content: req,
+                                    matchType: '技术要求'
+                                });
+                            }
+                        });
+                    }
+                    
+                    // 搜索测试用例
+                    if (moduleData.testCases) {
+                        for (const [testType, testTypeData] of Object.entries(moduleData.testCases)) {
+                            for (const [testGroup, testCases] of Object.entries(testTypeData.testGroups)) {
+                                testCases.forEach(testCase => {
+                                    const searchableContent = [
+                                        testCase.name,
+                                        testCase.content,
+                                        testCase.purpose,
+                                        testCase.steps,
+                                        testCase.notes,
+                                        testCase.description
+                                    ].join(' ').toLowerCase();
+                                    
+                                    if (searchableContent.includes(searchTerm)) {
+                                        searchResults.push({
+                                            type: 'testCase',
+                                            techLevel,
+                                            moduleName,
+                                            testType,
+                                            testGroup,
+                                            testCase,
+                                            matchType: '测试用例'
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // 显示搜索结果
+            displaySearchResults(searchTerm, searchResults);
+        }
+
+        // 显示搜索结果
+        function displaySearchResults(searchTerm, searchResults) {
+            const searchResultsEl = document.getElementById('searchResults');
+            const searchResultsCountEl = document.getElementById('searchResultsCount');
+            const searchResultsContentEl = document.getElementById('searchResultsContent');
+            const contentArea = document.getElementById('contentArea');
+            
+            document.getElementById('pageTitle').textContent = "搜索结果";
+            document.getElementById('pageDescription').textContent = `搜索关键词: ${searchTerm}`;
+            document.getElementById('backButton').style.display = 'block';
+            
+            // 更新面包屑
+            const breadcrumb = document.getElementById('breadcrumb');
+            breadcrumb.innerHTML = `
+                <a href="#" id="homeBreadcrumb">首页</a>
+                <span class="breadcrumb-separator">></span>
+                <span>搜索结果</span>
+            `;
+            
+            document.getElementById('homeBreadcrumb').addEventListener('click', (e) => {
+                e.preventDefault();
+                loadHomePage();
+            });
+            
+            if (searchResults.length === 0) {
+                searchResultsCountEl.textContent = `未找到与"${searchTerm}"相关的结果`;
+                searchResultsContentEl.innerHTML = '';
+                searchResultsEl.classList.remove('hidden');
+                contentArea.innerHTML = '';
+                return;
+            }
+            
+            searchResultsCountEl.textContent = `找到 ${searchResults.length} 个与"${searchTerm}"相关的结果`;
+            
+            let resultsHTML = '';
+            
+            searchResults.forEach(result => {
+                if (result.type === 'requirement') {
+                    resultsHTML += `
+                        <div class="test-case-card">
+                            <div class="test-case-header">
+                                <h5 class="test-case-title">${result.moduleName} - 技术要求</h5>
+                                <span class="test-case-id">${result.techLevel}</span>
+                            </div>
+                            <div class="test-case-content">
+                                <p>${highlightText(result.content, searchTerm)}</p>
+                            </div>
+                        </div>
+                    `;
+                } else if (result.type === 'testCase') {
+                    resultsHTML += `
+                        <div class="test-case-card">
+                            <div class="test-case-header">
+                                <h5 class="test-case-title">${result.testCase.name}</h5>
+                                <span class="test-case-id">ID: ${result.testCase.id}</span>
+                            </div>
+                            <div class="test-case-content">
+                                <p><strong>技术层面：</strong>${result.techLevel}</p>
+                                <p><strong>硬件模块：</strong>${result.moduleName}</p>
+                                <p><strong>测试用例类型：</strong>${result.testType}</p>
+                                <p><strong>测试用例组：</strong>${result.testGroup}</p>
+                                <p><strong>对应内容：</strong>${highlightText(result.testCase.content, searchTerm)}</p>
+                                <p><strong>测试目的：</strong>${highlightText(result.testCase.purpose, searchTerm)}</p>
+                                <p><strong>测试步骤及输入数据：</strong><br>${highlightText(result.testCase.steps, searchTerm)}</p>
+                                <p><strong>测试用例类型：</strong><span class="test-case-type-badge ${getTypeClass(result.testCase.type)}">${result.testCase.type}</span></p>
+                                <p><strong>是否已有鲲鹏测试步骤：</strong><span class="kunpeng-status ${result.testCase.kunpeng.includes('已有') ? 'has-steps' : 'no-steps'}">${result.testCase.kunpeng}</span></p>
+                                ${result.testCase.notes ? `<p><strong>备注：</strong>${highlightText(result.testCase.notes, searchTerm)}</p>` : ''}
+                                <p><strong>测试用例描述：</strong>${highlightText(result.testCase.description, searchTerm)}</p>
+                            </div>
+                            <div class="test-case-footer">
+                                <span>测试用例包: ${result.testCase.package}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            searchResultsContentEl.innerHTML = resultsHTML;
+            searchResultsEl.classList.remove('hidden');
+            contentArea.innerHTML = '';
+        }
+
+        // 高亮显示搜索词
+        function highlightText(text, searchTerm) {
+            if (!searchTerm) return text;
+            
+            const regex = new RegExp(`(${searchTerm})`, 'gi');
+            return text.replace(regex, '<span class="highlight">$1</span>');
         }
 
         // 移动端侧边栏切换
@@ -1088,60 +1950,31 @@
             document.getElementById('sidebar').classList.toggle('active');
         });
 
-        // 导航菜单点击事件
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('.nav-item > a')) {
-                const navItem = e.target.closest('.nav-item');
-                const link = e.target.closest('a');
-                const href = link.getAttribute('href');
-                
-                // 如果是内部锚点链接
-                if (href && href.startsWith('#')) {
-                    const anchorId = href.substring(1);
-                    scrollToAnchor(anchorId);
-                    
-                    // 如果是移动端，点击后关闭侧边栏
-                    if (window.innerWidth <= 768) {
-                        document.getElementById('sidebar').classList.remove('active');
-                    }
-                    
-                    e.preventDefault();
-                }
-                
-                // 如果点击的是有子菜单的项，则切换子菜单显示
-                if (navItem.querySelector('.submenu')) {
-                    e.preventDefault();
-                    navItem.classList.toggle('active');
-                }
+        // 返回按钮事件
+        document.getElementById('backButton').addEventListener('click', function() {
+            if (currentPage.type === "techLevel") {
+                loadHomePage();
+            } else if (currentPage.type === "module") {
+                loadTechLevelPage(currentPage.techLevel);
+            } else if (currentPage.type === "testType") {
+                loadModulePage(currentPage.techLevel, currentPage.module);
+            } else if (currentPage.type === "testGroup") {
+                loadTestTypePage(currentPage.techLevel, currentPage.module, currentPage.testType);
             }
         });
 
-        // 简单搜索功能
-        document.getElementById('searchInput').addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const testCases = document.querySelectorAll('.test-case-card');
-            const sections = document.querySelectorAll('.section');
-            
-            let hasResults = false;
-            
-            testCases.forEach(card => {
-                const text = card.textContent.toLowerCase();
-                if (text.includes(searchTerm)) {
-                    card.style.display = 'block';
-                    hasResults = true;
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-            
-            // 如果没有搜索结果，隐藏所有部分
-            sections.forEach(section => {
-                if (!hasResults && searchTerm) {
-                    section.style.display = 'none';
-                } else {
-                    section.style.display = 'block';
-                }
-            });
+        // 搜索按钮事件
+        document.getElementById('searchButton').addEventListener('click', function() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            performSearch(searchTerm);
+        });
+
+        // 搜索框回车事件
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+                performSearch(searchTerm);
+            }
         });
 
         // 返回顶部功能
@@ -1165,14 +1998,11 @@
         // 初始化页面
         document.addEventListener('DOMContentLoaded', function() {
             generateNavigation();
-            generateContent();
             
-            // 处理页面加载时的锚点
-            if (window.location.hash) {
-                setTimeout(() => {
-                    scrollToAnchor(window.location.hash.substring(1));
-                }, 100);
-            }
+            // 模拟加载延迟
+            setTimeout(() => {
+                loadHomePage();
+            }, 500);
         });
     </script>
 </body>
